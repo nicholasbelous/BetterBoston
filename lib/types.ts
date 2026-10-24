@@ -15,7 +15,7 @@ export type Tenure = "renter" | "owner";
 export interface ScoreCellProperties {
   cell_id: string;
   bbox: BBox;
-  /** Demo neighborhood this cell belongs to, e.g. "Chinatown" */
+  /** Boston neighborhood (BPDA name) this cell belongs to, e.g. "Chinatown" */
   neighborhood: string;
   /** Mean land surface temperature (°F) on the scene date. null = not enough valid pixels */
   mean_surface_temp_f: number | null;

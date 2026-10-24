@@ -57,7 +57,7 @@ If you see `"/map" does not satisfy the constraint 'AppRoutes'`, run `npx next t
 
 ## Decisions already made
 
-- **Demo neighborhoods:** Chinatown (hot, paved), West Roxbury (green), East Boston (mixed, near water).
+- **Coverage (changed Oct 24):** the City of Boston, except West Roxbury and the Harbor Islands. Demo addresses: Chinatown and East Boston (hot, paved), Beacon Hill (near average), Jamaica Plain, Perkins St (cool, green).
 - **Leaf-off imagery:** the MassGIS 2025 photos were taken March 18 to April 23, 2025, before leaf-out. The score is called **"green cover"**, not "tree canopy," and the About page explains why.
 - **Heat scene:** Landsat 9, June 25, 2024 (`LC09_L2SP_012031_20240625_02_T1`), under 1% cloud over Boston.
 - **AI provider:** Anthropic API (Claude Haiku), not AWS Bedrock.
@@ -265,14 +265,14 @@ If real data runs late, demo with the sample grid and keep the "SAMPLE DATA" ban
 
 ## Demo script (2 minutes, built to win)
 
-1. **The problem (15 s).** On June 25, 2024, the ground on our Chinatown demo block was about 13°F hotter than the Boston average, while our West Roxbury block was about 3°F cooler (from data/scores). But nobody can read a satellite thermal image, and renters especially don't know what help exists.
+1. **The problem (15 s).** On June 25, 2024, the ground on our Chinatown demo block was about 13°F hotter than the Boston average, while a Perkins St block in Jamaica Plain was about 15°F cooler (from data/scores). But nobody can read a satellite thermal image, and renters especially don't know what help exists.
 2. **Chinatown (40 s).** Type the demo address. Show:
    - the aerial photo of the block
    - the heat score: the ground got hotter than most of Boston on June 25, 2024. Point at the "ground, not air" label.
    - low green cover
    - the live cards: today's NWS weather, AQI, the FEMA zone plus future flooding at 21 inches of sea level rise, nearby street trees with **empty planting spots** (near 50 Hudson St: 23 trees, 4 empty spots), and the nearest community center (Quincy, 0.3 mi)
 3. **Renter → owner (20 s).** Flip the toggle. The plan changes: renters get cooling centers, tree requests, and community solar; owners also get heat pumps and rooftop solar. Every action links to a real, verified Massachusetts program.
-4. **West Roxbury (20 s).** Cooler ground, much greener, a different plan. Same honesty labels.
+4. **Jamaica Plain, Perkins St (20 s).** Cooler ground, much greener, a different plan. Same honesty labels. Zoom the climate map out to show the whole city.
 5. **Why trust it (15 s).**
    - Scores come from our own satellite pipeline, and every source and date is shown.
    - The AI can only cite verified programs and facts we fetched. Invented phone numbers or dollar amounts get rejected automatically.

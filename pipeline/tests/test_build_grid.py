@@ -16,7 +16,7 @@ from pyproj import Transformer
 import build_grid
 import validate_scores
 from build_grid import CellStats, SceneInfo
-from config import CELL_SIZE_M, DEMO_BBOXES
+from config import CELL_SIZE_M, EXCLUDED_NEIGHBORHOODS
 
 # ---------------------------------------------------------------------------
 # Shared geometry helpers
@@ -49,15 +49,33 @@ def _cells_with_center_in(bbox, size=CELL_SIZE_M):
     return out
 
 
-# Candidate cells per Demo_Bbox, in DEMO_BBOXES order.
-_DEMO_CELLS = [_cells_with_center_in(b) for _, b in DEMO_BBOXES]
+# Stand-in neighborhoods (lng/lat boxes) for the builder's ``neighborhood_of``.
+# West Roxbury is in config.EXCLUDED_NEIGHBORHOODS, so its cells are never written.
+_TEST_AREAS = (
+    ("Chinatown", (-71.066, 42.346, -71.056, 42.354)),
+    ("West Roxbury", (-71.170, 42.270, -71.140, 42.290)),
+    ("East Boston", (-71.045, 42.365, -71.025, 42.385)),
+)
 
-# Boston cells outside every Demo_Bbox (inside the validator's Boston envelope),
+
+def _neighborhood_of(x, y):
+    """Name of the first test box containing the EPSG:26919 point, or None."""
+    lng, lat = _TO_4326(x, y)
+    for name, (min_lng, min_lat, max_lng, max_lat) in _TEST_AREAS:
+        if min_lng <= lng <= max_lng and min_lat <= lat <= max_lat:
+            return name
+    return None
+
+
+# Candidate cells per test neighborhood, in _TEST_AREAS order.
+_AREA_CELLS = [_cells_with_center_in(b) for _, b in _TEST_AREAS]
+
+# Boston cells in no test neighborhood (inside the validator's Boston envelope),
 # so scoring ranks over more cells than are written out.
 _OTHER_CELLS = [
     c
     for c in _cells_with_center_in((-71.12, 42.30, -71.08, 42.33))
-    if build_grid.demo_neighborhood(*_TO_4326(c[0] + 50, c[1] + 50)) is None
+    if _neighborhood_of(c[0] + 50, c[1] + 50) is None
 ]
 
 
@@ -68,14 +86,14 @@ _OTHER_CELLS = [
 
 @st.composite
 def cell_stats(draw):
-    """``CellStats`` covering every Demo_Bbox, with both reference sets nonempty.
+    """``CellStats`` covering every test neighborhood, with both reference sets nonempty.
 
     Counts satisfy ``1 <= n_inside``, ``n_tree <= n_heat <= n_inside``; means
     are NaN exactly where their count is 0. Small even ``n_inside`` values
     make fractions exactly 0.5 common.
     """
     keys = set()
-    for candidates in _DEMO_CELLS:
+    for candidates in _AREA_CELLS:
         keys.update(
             draw(st.lists(st.sampled_from(candidates), min_size=1, max_size=4, unique=True))
         )
@@ -141,9 +159,9 @@ generated_ats = st.datetimes(
 # ---------------------------------------------------------------------------
 
 
-def test_generators_cover_demo_and_other_cells():
+def test_generators_cover_area_and_other_cells():
     """Sanity check for the Property 29 generator inputs."""
-    assert all(_DEMO_CELLS), "every Demo_Bbox needs candidate cells"
+    assert all(_AREA_CELLS), "every test neighborhood needs candidate cells"
     assert _OTHER_CELLS
 
 
@@ -151,7 +169,7 @@ def test_generators_cover_demo_and_other_cells():
 @given(stats=cell_stats(), scene=scene_infos(), generated_at=generated_ats)
 def test_builder_output_passes_validator(stats, scene, generated_at):
     """**Validates: Requirements 9.10, 10.4, 11.5**"""
-    grid, meta = build_grid.build_outputs(stats, scene, generated_at, _TO_4326)
+    grid, meta = build_grid.build_outputs(stats, scene, generated_at, _TO_4326, _neighborhood_of)
 
     # Validate what would be written to disk, parsed back as the validator does.
     grid = json.loads(build_grid.dumps_grid(grid))
@@ -164,6 +182,16 @@ def test_builder_output_passes_validator(stats, scene, generated_at):
     assert errors.items == []
     assert n_features == len(grid["features"])
     assert meta["grid"]["cell_count"] == len(grid["features"])
-    # Every Demo_Bbox is represented in the output.
+    # Exactly the cells in included neighborhoods are written out.
+    kept = [
+        name
+        for name in (
+            _neighborhood_of(int(e) + 50, int(n) + 50)
+            for e, n in zip(stats.easting, stats.northing)
+        )
+        if name is not None and name not in EXCLUDED_NEIGHBORHOODS
+    ]
     names = {f["properties"]["neighborhood"] for f in grid["features"]}
-    assert names == {name for name, _ in DEMO_BBOXES}
+    assert len(grid["features"]) == len(kept)
+    assert names == {name for name, _ in _TEST_AREAS if name not in EXCLUDED_NEIGHBORHOODS}
+    assert meta["area"]["neighborhoods"] == sorted(names)

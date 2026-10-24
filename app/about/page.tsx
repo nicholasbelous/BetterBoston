@@ -67,7 +67,7 @@ export default function AboutPage() {
         <ul className="mt-2 list-disc space-y-1 pl-5 text-sm leading-relaxed text-ink-dim marker:text-mint">
           <li>Scores compare blocks with each other. They are not official assessments.</li>
           <li>Heat is from one summer day, not an average.</li>
-          <li>We only cover a few Boston neighborhoods today.</li>
+          <li>Scores cover the City of Boston, except West Roxbury and the Harbor Islands.</li>
         </ul>
       </section>
 

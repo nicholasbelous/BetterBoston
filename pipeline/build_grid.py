@@ -1,4 +1,8 @@
-"""Turn the saved Landsat bands into scored 100 m cells for the demo areas.
+"""Turn the saved Landsat bands into scored 100 m cells for the City of Boston.
+
+Every Boston cell is scored against all of Boston. Cells whose center lies in
+a neighborhood listed in ``config.EXCLUDED_NEIGHBORHOODS`` (or in no
+neighborhood) are left out of the published grid.
 
 Run from the repo root:
 
@@ -45,9 +49,11 @@ from config import (
     BAND_PATHS,
     BOSTON_GEOJSON,
     CELL_SIZE_M,
-    DEMO_BBOXES,
+    EXCLUDED_NEIGHBORHOODS,
     MIN_VALID_FRAC,
     NDVI_THRESHOLD,
+    NEIGHBORHOOD_SNAP_M,
+    NEIGHBORHOODS_GEOJSON,
     OUTPUT_CRS,
     PROCESSING_CRS,
     SCENE_FILE,
@@ -73,7 +79,8 @@ if TYPE_CHECKING:  # type hints only; keeps import light
     # (x, y) in EPSG:26919 -> (lng, lat) in EPSG:4326, e.g. a pyproj
     # ``Transformer.from_crs(..., always_xy=True).transform``.
     To4326 = Callable[[float, float], tuple[float, float]]
-    DemoBboxes = Sequence[tuple[str, Sequence[float]]]
+    # (x, y) of a cell center in EPSG:26919 -> neighborhood name, or None.
+    NeighborhoodOf = Callable[[float, float], str | None]
 
 # ASCII digits only: ``\d`` would also match other Unicode digits.
 _DATE_RE = re.compile(r"[0-9]{4}-[0-9]{2}-[0-9]{2}")
@@ -133,8 +140,8 @@ class ScoredCells:
 
 
 @dataclass(frozen=True)
-class DemoCell:
-    """A Boston_Cell whose center lies in a Demo_Bbox (Requirement 9)."""
+class OutputCell:
+    """A Boston_Cell whose center lies in an included neighborhood (Requirement 9)."""
 
     index: int  # row in ScoredCells / CellStats
     easting: int  # lower-left, EPSG:26919
@@ -144,12 +151,14 @@ class DemoCell:
     bbox: list[float]  # [minLng, minLat, maxLng, maxLat] of ``ring``
 
 
-class EmptyDemoAreas(Exception):
-    """One or more Demo_Bboxes contain no output cell (Requirement 9.11)."""
+class EmptyCoverage(Exception):
+    """No Boston cell lies in an included neighborhood (Requirement 9.11)."""
 
-    def __init__(self, names) -> None:
-        self.names = list(names)
-        super().__init__("no Boston cells in demo area(s): " + ", ".join(self.names))
+    def __init__(self) -> None:
+        super().__init__(
+            "no Boston cell lies in an included neighborhood "
+            f"(excluded: {', '.join(EXCLUDED_NEIGHBORHOODS) or 'none'})"
+        )
 
 
 class EmptyReferenceSet(Exception):
@@ -412,7 +421,7 @@ def score_cells(stats: CellStats, min_valid_frac: float = MIN_VALID_FRAC) -> Sco
     )
 
 
-# ---- geometry, demo selection, and cell properties (Requirement 9) ----------
+# ---- geometry, cell selection, and cell properties (Requirement 9) ----------
 
 
 def cell_ring(e: int, n: int, size: int, to_4326: "To4326") -> list[list[float]]:
@@ -444,47 +453,37 @@ def cell_id(e: int, n: int) -> str:
     return f"c_{int(e)}_{int(n)}"
 
 
-def demo_neighborhood(lng: float, lat: float, demo_bboxes: "DemoBboxes" = DEMO_BBOXES) -> str | None:
-    """Name of the first Demo_Bbox (in the given order) containing the point (9.1, 9.2).
-
-    Bounds are inclusive. Returns ``None`` when no Demo_Bbox contains it.
-    """
-    for name, (min_lng, min_lat, max_lng, max_lat) in demo_bboxes:
-        if min_lng <= lng <= max_lng and min_lat <= lat <= max_lat:
-            return name
-    return None
-
-
-def select_demo_cells(
+def select_cells(
     scored: ScoredCells,
     size: int = CELL_SIZE_M,
     to_4326: "To4326 | None" = None,
-    demo_bboxes: "DemoBboxes" = DEMO_BBOXES,
-) -> list[DemoCell]:
-    """Boston_Cells whose center lies in a Demo_Bbox, with geometry (9.1–9.5, 9.9, 9.11).
+    neighborhood_of: "NeighborhoodOf | None" = None,
+    excluded: "Sequence[str]" = EXCLUDED_NEIGHBORHOODS,
+) -> list[OutputCell]:
+    """Boston_Cells whose center lies in an included neighborhood, with geometry (9.1–9.5, 9.9, 9.11).
 
-    The center is ``(e + size/2, n + size/2)`` in EPSG:26919. A cell is kept
-    even if part of its polygon lies outside the Demo_Bbox. Output is sorted by
-    Demo_Bbox order, then ascending northing, then ascending easting. Raises
-    ``EmptyDemoAreas`` naming every Demo_Bbox (in order) with no cell.
+    ``neighborhood_of`` names the neighborhood of the cell center
+    ``(e + size/2, n + size/2)`` in EPSG:26919. Cells with no neighborhood, or
+    one listed in ``excluded``, are left out; they still count in the citywide
+    ranking done by ``score_cells``. Output is sorted by ascending northing,
+    then easting. Raises ``EmptyCoverage`` when no cell is left.
     """
-    if to_4326 is None:
-        raise ValueError("select_demo_cells: to_4326 is required")
+    if to_4326 is None or neighborhood_of is None:
+        raise ValueError("select_cells: to_4326 and neighborhood_of are required")
     stats = scored.stats if isinstance(scored, ScoredCells) else scored
-    order = {name: k for k, (name, _) in enumerate(demo_bboxes)}
+    skip = set(excluded)
     half = int(size) / 2
 
-    cells: list[DemoCell] = []
+    cells: list[OutputCell] = []
     for i in range(len(stats)):
         e = int(stats.easting[i])
         n = int(stats.northing[i])
-        lng, lat = to_4326(e + half, n + half)
-        name = demo_neighborhood(float(lng), float(lat), demo_bboxes)
-        if name is None:
+        name = neighborhood_of(e + half, n + half)
+        if name is None or name in skip:
             continue
         ring = cell_ring(e, n, size, to_4326)
         cells.append(
-            DemoCell(
+            OutputCell(
                 index=i,
                 easting=e,
                 northing=n,
@@ -494,12 +493,9 @@ def select_demo_cells(
             )
         )
 
-    found = {c.neighborhood for c in cells}
-    empty = [name for name, _ in demo_bboxes if name not in found]
-    if empty:
-        raise EmptyDemoAreas(empty)
-
-    cells.sort(key=lambda c: (order[c.neighborhood], c.northing, c.easting))
+    if not cells:
+        raise EmptyCoverage()
+    cells.sort(key=lambda c: (c.northing, c.easting))
     return cells
 
 
@@ -525,7 +521,7 @@ def _opt_int(value, key: str) -> int | None:
     return int(round(_finite(value, key)))
 
 
-def cell_properties(cell: DemoCell, scored: ScoredCells, i: int | None = None) -> dict:
+def cell_properties(cell: OutputCell, scored: ScoredCells, i: int | None = None) -> dict:
     """``ScoreCellProperties`` for one output cell, keys in fixed order (9.5–9.8).
 
     ``i`` is the row in ``scored``; it defaults to ``cell.index``. Values are
@@ -549,7 +545,7 @@ def cell_properties(cell: DemoCell, scored: ScoredCells, i: int | None = None) -
     }
 
 
-def build_feature(cell: DemoCell, props: dict) -> dict:
+def build_feature(cell: OutputCell, props: dict) -> dict:
     """GeoJSON ``Feature`` with only ``type``, ``geometry``, ``properties`` (9.9)."""
     return {
         "type": "Feature",
@@ -566,8 +562,16 @@ def build_grid_obj(features) -> dict:
 # ---- metadata and serialization (Requirement 10) ----------------------------
 
 GENERATED_BY = "pipeline/build_grid.py"
-AREA_NAME = "Boston demo areas"
 REFERENCE_AREA = "City of Boston"
+
+
+def area_name(excluded: "Sequence[str]" = EXCLUDED_NEIGHBORHOODS) -> str:
+    """``"City of Boston"``, plus ``", except A and B"`` for excluded neighborhoods."""
+    names = list(excluded)
+    if not names:
+        return REFERENCE_AREA
+    listed = names[0] if len(names) == 1 else ", ".join(names[:-1]) + " and " + names[-1]
+    return f"{REFERENCE_AREA}, except {listed}"
 HEAT_SOURCE = (
     "Landsat 8/9 Collection 2 Level-2 surface temperature "
     "(USGS, via Microsoft Planetary Computer)"
@@ -591,24 +595,27 @@ SOURCES = (
 )
 
 
-def _demo_union_bbox(demo_bboxes: "DemoBboxes" = DEMO_BBOXES) -> list[float]:
-    """``[minLng, minLat, maxLng, maxLat]`` covering every Demo_Bbox (10.3)."""
-    boxes = [b for _, b in demo_bboxes]
+def _cells_bbox(cells: "Sequence[OutputCell]") -> list[float]:
+    """``[minLng, minLat, maxLng, maxLat]`` covering every output cell (10.3)."""
     return [
-        float(min(b[0] for b in boxes)),
-        float(min(b[1] for b in boxes)),
-        float(max(b[2] for b in boxes)),
-        float(max(b[3] for b in boxes)),
+        float(min(c.bbox[0] for c in cells)),
+        float(min(c.bbox[1] for c in cells)),
+        float(max(c.bbox[2] for c in cells)),
+        float(max(c.bbox[3] for c in cells)),
     ]
 
 
 def build_metadata(
-    scene: SceneInfo, reference_mean_f: float, cell_count: int, generated_at: str
+    scene: SceneInfo,
+    reference_mean_f: float,
+    cells: "Sequence[OutputCell]",
+    generated_at: str,
 ) -> dict:
     """``ScoreMetadata`` dict with keys in ``lib/types.ts`` order (10.1–10.8).
 
     ``generated_at`` is passed in (``YYYY-MM-DDTHH:MM:SSZ``, UTC) so tests can
-    fix it. ``reference_mean_f`` must be finite; it is rounded to 0.1.
+    fix it. ``reference_mean_f`` must be finite; it is rounded to 0.1. The area
+    lists the neighborhoods present in ``cells`` (sorted) and their extent.
     """
     ref = round(_finite(reference_mean_f, "reference_mean_f"), 1)
     return {
@@ -617,15 +624,15 @@ def build_metadata(
         "generated_at": generated_at,
         "generated_by": GENERATED_BY,
         "area": {
-            "name": AREA_NAME,
-            "neighborhoods": [name for name, _ in DEMO_BBOXES],
-            "bbox": _demo_union_bbox(),
+            "name": area_name(),
+            "neighborhoods": sorted({c.neighborhood for c in cells}),
+            "bbox": _cells_bbox(cells),
         },
         "grid": {
             "cell_size_m": CELL_SIZE_M,
             "processing_crs": PROCESSING_CRS,
             "output_crs": OUTPUT_CRS,
-            "cell_count": int(cell_count),
+            "cell_count": len(cells),
         },
         "heat": {
             "source": HEAT_SOURCE,
@@ -669,19 +676,23 @@ def dumps_meta(meta: dict) -> str:
 
 
 def build_outputs(
-    stats: CellStats, scene: SceneInfo, generated_at: str, to_4326: "To4326"
+    stats: CellStats,
+    scene: SceneInfo,
+    generated_at: str,
+    to_4326: "To4326",
+    neighborhood_of: "NeighborhoodOf",
 ) -> tuple[dict, dict]:
-    """Score all Boston_Cells, select demo cells, and build ``(grid, meta)``.
+    """Score all Boston_Cells, select the included ones, and build ``(grid, meta)``.
 
-    Pure composition of ``score_cells``, ``select_demo_cells``,
+    Pure composition of ``score_cells``, ``select_cells``,
     ``cell_properties``, ``build_feature``, ``build_grid_obj``, and
-    ``build_metadata``. Raises ``EmptyReferenceSet`` or ``EmptyDemoAreas``.
+    ``build_metadata``. Raises ``EmptyReferenceSet`` or ``EmptyCoverage``.
     """
     scored = score_cells(stats)
-    cells = select_demo_cells(scored, to_4326=to_4326)
+    cells = select_cells(scored, to_4326=to_4326, neighborhood_of=neighborhood_of)
     features = [build_feature(c, cell_properties(c, scored)) for c in cells]
     grid = build_grid_obj(features)
-    meta = build_metadata(scene, scored.reference_mean_f, len(features), generated_at)
+    meta = build_metadata(scene, scored.reference_mean_f, cells, generated_at)
     return grid, meta
 
 
@@ -734,13 +745,15 @@ def _read_work_band(path: Path) -> "Band":
         )
 
 
-def load_inputs() -> tuple[dict[str, "Band"], "geopandas.GeoDataFrame"]:
-    """Open the four band GeoTIFFs and ``boston.geojson`` (Requirement 7.10).
+def load_inputs() -> tuple[
+    dict[str, "Band"], "geopandas.GeoDataFrame", "geopandas.GeoDataFrame"
+]:
+    """Open the four band GeoTIFFs, ``boston.geojson``, and ``neighborhoods.geojson`` (7.10).
 
     Every file is checked before raising, so ``InputError`` lists each missing
     or unreadable path, not just the first. Nothing is written.
     """
-    from raster_io import load_boundary
+    from raster_io import load_boundary, load_neighborhoods
 
     problems: list[str] = []
     bands: dict[str, Band] = {}
@@ -768,9 +781,46 @@ def load_inputs() -> tuple[dict[str, "Band"], "geopandas.GeoDataFrame"]:
             boundary = None
             problems.append(f"{BOSTON_GEOJSON}: cannot be opened ({exc})")
 
+    neighborhoods = None
+    path = abs_path(NEIGHBORHOODS_GEOJSON)
+    if not path.is_file():
+        problems.append(
+            f"{NEIGHBORHOODS_GEOJSON}: does not exist (run `python3 pipeline/boston_boundary.py`)"
+        )
+    else:
+        try:
+            neighborhoods = load_neighborhoods(path)
+        except Exception as exc:  # noqa: BLE001 - unreadable or empty GeoJSON
+            problems.append(f"{NEIGHBORHOODS_GEOJSON}: cannot be opened ({exc})")
+
     if problems:
         raise InputError(problems)
-    return bands, boundary
+    return bands, boundary, neighborhoods
+
+
+def neighborhood_lookup(neighborhoods, snap_m: float = NEIGHBORHOOD_SNAP_M) -> "NeighborhoodOf":
+    """``(x, y)`` in PROCESSING_CRS -> neighborhood name, from polygons with a ``name`` column.
+
+    A point inside (or on the edge of) a polygon gets its name; if polygons
+    overlap, the first name in alphabetical order wins. A point inside none
+    gets the nearest polygon's name when it is within ``snap_m`` meters, so
+    shoreline cells are not dropped over small boundary mismatches; otherwise
+    ``None``.
+    """
+    import shapely
+
+    gdf = neighborhoods.to_crs(PROCESSING_CRS).sort_values("name", kind="stable")
+    names = [str(v) for v in gdf["name"]]
+    tree = shapely.STRtree(list(gdf.geometry))
+
+    def lookup(x: float, y: float) -> str | None:
+        point = shapely.Point(float(x), float(y))
+        hits = tree.query(point, predicate="intersects")
+        if len(hits) == 0:
+            hits = tree.query_nearest(point, max_distance=snap_m)
+        return names[int(min(hits))] if len(hits) else None
+
+    return lookup
 
 
 def compute_cell_stats(bands: dict[str, "Band"], boundary) -> CellStats:
@@ -899,11 +949,10 @@ def _read_scene() -> SceneInfo:
 
 
 def _summary_counts(grid: dict) -> tuple[list[tuple[str, int]], int, int]:
-    """Per-neighborhood cell counts (config order) and null heat/tree score counts."""
+    """Per-neighborhood cell counts (by name) and null heat/tree score counts."""
     props = [f["properties"] for f in grid["features"]]
-    per_area = [
-        (name, sum(1 for p in props if p["neighborhood"] == name)) for name, _ in DEMO_BBOXES
-    ]
+    names = sorted({p["neighborhood"] for p in props})
+    per_area = [(name, sum(1 for p in props if p["neighborhood"] == name)) for name in names]
     null_heat = sum(1 for p in props if p["heat_score"] is None)
     null_tree = sum(1 for p in props if p["tree_score"] is None)
     return per_area, null_heat, null_tree
@@ -926,7 +975,7 @@ def main() -> int:
         print(f"Scene: {scene.id} ({scene.date})")
 
         # 7.10: every input file exists and opens.
-        bands, boundary = load_inputs()
+        bands, boundary, neighborhoods = load_inputs()
 
         # 7.9: bands share CRS, shape, and transform.
         from raster_io import check_alignment
@@ -940,14 +989,16 @@ def main() -> int:
         stats = compute_cell_stats(bands, boundary)
         print(f"Boston cells: {len(stats)}")
 
-        # 8.8, 9.11: score all Boston cells, then select demo cells.
+        # 8.8, 9.11: score all Boston cells, then keep the included neighborhoods.
         from pyproj import Transformer
 
         to_4326 = Transformer.from_crs(PROCESSING_CRS, OUTPUT_CRS, always_xy=True).transform
-        grid, meta = build_outputs(stats, scene, _utc_now(), to_4326)
+        grid, meta = build_outputs(
+            stats, scene, _utc_now(), to_4326, neighborhood_lookup(neighborhoods)
+        )
         grid_text = dumps_grid(grid)
         meta_text = dumps_meta(meta)
-    except (SceneError, InputError, EmptyReferenceSet, EmptyDemoAreas) as exc:
+    except (SceneError, InputError, EmptyReferenceSet, EmptyCoverage) as exc:
         _err(str(exc))
         return 1
 

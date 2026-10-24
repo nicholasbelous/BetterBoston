@@ -894,3 +894,7 @@ All `pytest pipeline/tests -q` tests run from the repo root with no network. Tes
 5. `pipeline/build_grid.py` (+ build tests, Properties 18–30, end-to-end offline example).
 6. `pipeline/README.md`.
 7. `pipeline/find_scene.py` LAST, marked optional (+ Properties 12–13).
+
+## Change: citywide coverage (October 24, 2026)
+
+The three Demo_Bboxes were replaced by neighborhood selection. Scoring is unchanged: every Boston_Cell is still scored and ranked against all of Boston. `select_cells` (formerly `select_demo_cells`) keeps a cell when its center lies in a BPDA neighborhood polygon (`pipeline/work/neighborhoods.geojson`, saved by `boston_boundary.py`) that is not in `config.EXCLUDED_NEIGHBORHOODS` (West Roxbury, Harbor Islands). A center that misses every polygon takes the nearest one within `NEIGHBORHOOD_SNAP_M` (150 m), or is dropped. `neighborhood` is the BPDA name. `metadata.area` lists the neighborhoods present and the extent of the published cells. Result: 11,780 of 13,981 Boston cells in 24 neighborhoods. All 500 cells shared with the old demo grid kept identical scores and geometry.

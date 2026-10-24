@@ -149,6 +149,24 @@ def load_boundary(path: Path) -> geopandas.GeoDataFrame:
     return gdf.to_crs(OUTPUT_CRS)
 
 
+def load_neighborhoods(path: Path) -> geopandas.GeoDataFrame:
+    """Read the BPDA neighborhood GeoJSON: a ``name`` column plus polygons, in EPSG:4326.
+
+    Raises ``ValueError`` when no feature has both a non-empty name and a geometry.
+    """
+    import geopandas
+
+    gdf = geopandas.read_file(path)
+    if "name" not in gdf.columns:
+        raise ValueError("no 'name' field")
+    gdf = gdf.set_crs(OUTPUT_CRS) if gdf.crs is None else gdf.to_crs(OUTPUT_CRS)
+    named = gdf["name"].map(lambda v: isinstance(v, str) and bool(v.strip()))
+    gdf = gdf[named & gdf.geometry.notna() & ~gdf.geometry.is_empty]
+    if gdf.empty:
+        raise ValueError("contains no named neighborhood polygons")
+    return gdf[["name", "geometry"]].reset_index(drop=True)
+
+
 def inside_mask(
     boundary: geopandas.GeoDataFrame,
     crs: CRS,

@@ -176,7 +176,8 @@ let gridCache: Promise<GridData> | null = null;
 /** Every score cell, for coloring the map. Same cells and ids as /api/score. Cached per page load. */
 export function loadGrid(): Promise<GridData> {
   gridCache ??= (async (): Promise<GridData> => {
-    const res = await fetchWithTimeout("/api/grid", {}, 10000);
+    // The citywide grid is a few MB, so give slow phone connections time.
+    const res = await fetchWithTimeout("/api/grid", {}, 30000);
     if (res?.ok) {
       try {
         const body = (await res.json()) as GridResponse;

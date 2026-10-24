@@ -163,7 +163,12 @@ export default function MapView({
                 id: "grid-line",
                 type: "line",
                 source: "grid",
-                paint: { "line-color": "rgba(255,255,255,0.12)", "line-width": 0.6 },
+                paint: {
+                  "line-color": "rgba(255,255,255,0.12)",
+                  "line-width": 0.6,
+                  // Hide cell outlines when zoomed out to the whole city, where they turn into a mesh.
+                  "line-opacity": ["interpolate", ["linear"], ["zoom"], 12.5, 0, 14.5, 1],
+                },
               },
               {
                 id: "selected-outline",

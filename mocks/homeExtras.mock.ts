@@ -14,7 +14,7 @@ export interface HomeExtras {
 const BY_NEIGHBORHOOD: Record<string, HomeExtras> = {
   "Beacon Hill": { flood: "Low", air: "Moderate" },
   Chinatown: { flood: "Moderate", air: "Moderate" },
-  "West Roxbury": { flood: "Low", air: "Low" },
+  "Jamaica Plain": { flood: "Low", air: "Low" },
   "East Boston": { flood: "High", air: "Moderate" },
 };
 

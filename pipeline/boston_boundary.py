@@ -7,7 +7,8 @@ Run from the repo root:
 Downloads the Massachusetts 1:500k cartographic boundary place file (GENZ2023,
 falling back to GENZ2022 only when GENZ2023 returns HTTP 404), keeps every
 feature with ``NAME == "Boston"``, reprojects to EPSG:4326, and saves it to
-``pipeline/work/boston.geojson`` (Requirement 3).
+``pipeline/work/boston.geojson`` (Requirement 3). Then saves the BPDA
+neighborhood boundaries to ``pipeline/work/neighborhoods.geojson``.
 
 Exit status: 0 when the boundary is saved, 1 on a download failure, an
 unreadable zip, or no Boston feature. On any failure the existing
@@ -27,11 +28,13 @@ from config import (
     BOSTON_GEOJSON,
     CENSUS_ZIP_URLS,
     HTTP_TIMEOUT_S,
+    NEIGHBORHOODS_GEOJSON,
+    NEIGHBORHOODS_URL,
     OUTPUT_CRS,
     abs_path,
     ensure_work_dir,
 )
-from raster_io import write_json_atomic
+from raster_io import load_neighborhoods, write_json_atomic
 
 BOSTON_NAME = "Boston"
 _CHUNK = 1 << 16
@@ -160,6 +163,21 @@ def main() -> int:
     write_json_atomic(out, boston.to_json())
     print(f"Source: {url}")
     print(f"Saved {len(boston)} feature(s) to {BOSTON_GEOJSON}")
+
+    # Neighborhood names decide which cells build_grid.py writes out
+    # (config.EXCLUDED_NEIGHBORHOODS) and label each cell.
+    dest = abs_path(NEIGHBORHOODS_GEOJSON)
+    try:
+        download(NEIGHBORHOODS_URL, dest, HTTP_TIMEOUT_S)
+        hoods = load_neighborhoods(dest)
+    except DownloadError as exc:
+        print(f"error: download failed for {exc.url}: {exc.reason}", file=sys.stderr)
+        return 1
+    except Exception as exc:  # noqa: BLE001 - an ArcGIS error body is still HTTP 200
+        _remove(dest)
+        print(f"error: {NEIGHBORHOODS_URL} did not return usable polygons: {exc}", file=sys.stderr)
+        return 1
+    print(f"Saved {len(hoods)} neighborhoods to {NEIGHBORHOODS_GEOJSON}")
     return 0
 
 

@@ -1,10 +1,10 @@
-// Shown when an address is outside the processed demo area.
+// Shown when an address is outside the scored area (data/scores).
 // Never show a score in this case.
 import Link from "next/link";
 import Icon from "@/components/ui/Icon";
 import { btnGhost, card } from "@/components/ui/classes";
 
-export default function CoverageNotice({ neighborhoods = [] }: { neighborhoods?: string[] }) {
+export default function CoverageNotice() {
   return (
     <section className={`${card} flex flex-col gap-3 p-5`}>
       <span className="grid size-10 place-items-center rounded-xl bg-amber/15 text-amber">
@@ -12,8 +12,7 @@ export default function CoverageNotice({ neighborhoods = [] }: { neighborhoods?:
       </span>
       <h2 className="font-display text-lg font-semibold">Coverage coming soon</h2>
       <p className="text-sm leading-relaxed text-ink-dim">
-        We haven&apos;t mapped this area yet. Right now we cover a few Boston neighborhoods
-        {neighborhoods.length > 0 ? `: ${neighborhoods.join(", ")}` : ""}.
+        We haven&apos;t scored this spot yet. Right now our scores cover most of the City of Boston.
       </p>
       <Link href="/" className={`${btnGhost} self-start`}>
         Try another address

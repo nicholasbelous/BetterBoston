@@ -61,7 +61,7 @@ export default function AddressSearch() {
     <div className="flex flex-col gap-3.5">
       <form onSubmit={onSubmit} noValidate className="flex flex-col gap-2">
         <label htmlFor={inputId} className="sr-only">
-          Massachusetts address
+          Boston address
         </label>
         <div className="group flex items-center gap-2 rounded-2xl border border-line-strong bg-navy-900/80 p-1.5 pl-4 shadow-[0_14px_40px_-22px_rgb(0_0_0/0.9)] backdrop-blur transition duration-200 hover:border-white/25 focus-within:border-mint/60 focus-within:shadow-[0_0_0_4px_rgb(62_230_180/0.12),0_14px_40px_-22px_rgb(0_0_0/0.9)]">
           <Icon name="pin" size={20} className="shrink-0 text-ink-mute transition-colors duration-200 group-focus-within:text-mint" />
@@ -71,7 +71,7 @@ export default function AddressSearch() {
             inputMode="search"
             autoComplete="street-address"
             enterKeyHint="search"
-            placeholder="Enter an address…"
+            placeholder="Enter a Boston address…"
             maxLength={200}
             value={query}
             onChange={(e) => setQuery(e.target.value)}
@@ -130,7 +130,7 @@ export default function AddressSearch() {
           ))}
         </ul>
         <p className="mt-1.5 px-5 text-[11px] leading-snug text-ink-dim [text-shadow:0_1px_6px_rgb(6_15_22/0.95)] lg:px-0">
-          Scores cover Chinatown, West Roxbury, and East Boston for now. Aerial photos work statewide.
+          Heat and green cover scores for neighborhoods across the City of Boston.
         </p>
       </div>
     </div>

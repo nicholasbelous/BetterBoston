@@ -39,6 +39,7 @@ A mobile-first web app that turns satellite and aerial imagery into a plain-Engl
 
 ## Scope for the hackathon
 
-- Demo area: 2-3 Boston neighborhoods with contrasting results (Chinatown, West Roxbury, East Boston).
+- Coverage: the City of Boston, except West Roxbury and the Harbor Islands (`EXCLUDED_NEIGHBORHOODS` in `pipeline/config.py`). The home page asks for a Boston address.
+- Demo addresses with contrasting results: Chinatown and East Boston (hot, paved), Beacon Hill (near average), Jamaica Plain (cool, green).
 - Statewide coverage is out of scope.
 - Keep everything simple, working, and easy to demo. Don't over-engineer.

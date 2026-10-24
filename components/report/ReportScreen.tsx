@@ -207,7 +207,7 @@ export default function ReportScreen({ initial }: { initial: LocationContext }) 
           <Skeleton />
         ) : data.status === "out_of_coverage" ? (
           <div className="flex max-w-xl flex-col gap-5">
-            <CoverageNotice neighborhoods={data.metadata.area.neighborhoods} />
+            <CoverageNotice />
             {showPhoto ? <LiveConditions lat={initial.lat} lng={initial.lng} /> : null}
           </div>
         ) : (

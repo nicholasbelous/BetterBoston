@@ -7,7 +7,8 @@ import type { ApiError } from "@/lib/types";
 
 export async function GET() {
   try {
-    return Response.json(await getGrid());
+    // The citywide grid is a few MB and only changes when the pipeline reruns.
+    return Response.json(await getGrid(), { headers: { "Cache-Control": "public, max-age=300" } });
   } catch (err) {
     console.error("grid load failed", err);
     return Response.json(

@@ -17,9 +17,9 @@ export interface DemoAddress {
   aliases: string[];
 }
 
-// The first three points sit inside scored cells (checked with GET /api/score).
-// Beacon Hill is last on purpose: it is outside the scored area, so it demos
-// "Coverage coming soon" with the real aerial photo above it.
+// Every point sits inside a scored cell (checked with GET /api/score). Picked for
+// contrast: hot and paved (Chinatown, East Boston), cool and green (Jamaica Plain),
+// and close to the Boston average (Beacon Hill).
 export const DEMO_ADDRESSES: DemoAddress[] = [
   {
     id: "chinatown",
@@ -31,13 +31,13 @@ export const DEMO_ADDRESSES: DemoAddress[] = [
     aliases: ["hudson", "chinatown"],
   },
   {
-    id: "west-roxbury",
-    label: "Centre St",
-    cityLine: "West Roxbury, Boston, MA 02132",
-    neighborhood: "West Roxbury",
-    lat: 42.2857,
-    lng: -71.159,
-    aliases: ["centre st", "center st", "west roxbury"],
+    id: "jamaica-plain",
+    label: "Perkins St",
+    cityLine: "Jamaica Plain, Boston, MA 02130",
+    neighborhood: "Jamaica Plain",
+    lat: 42.3212,
+    lng: -71.1183,
+    aliases: ["perkins st", "perkins street", "jamaica plain"],
   },
   {
     id: "east-boston",

@@ -10,7 +10,7 @@ import "./globals.css";
 export const metadata: Metadata = {
   title: "ClimateCheck MA",
   description:
-    "A plain-language climate report for your Massachusetts block, from satellite and aerial imagery.",
+    "A plain-language climate report for your Boston block, from satellite and aerial imagery.",
 };
 
 export const viewport: Viewport = {

@@ -1,7 +1,7 @@
 // Landing page: address search + "use my location" + demo addresses.
 // On success, AddressSearch navigates to /map?lat=..&lng=..&q=<label>.
 //
-// Layout follows the first phone of the design mock-up: header, "Massachusetts" pill,
+// Layout follows the first phone of the design mock-up: header, "Boston" pill,
 // big headline, copy, address search, then the coastal photograph filling the lower
 // part of the screen with three value indicators over it. On large screens the photo
 // moves to the right and runs to the edge of the window.
@@ -62,7 +62,7 @@ export default function HomePage() {
         <div className="relative z-10 mx-auto w-full max-w-6xl px-5 pt-5 sm:pt-8 lg:pb-16 lg:pt-0">
           <div className="flex max-w-xl flex-col gap-5 lg:max-w-[34rem] lg:gap-6">
             <span className={`${eyebrowPill} rise-in self-start`} style={delay(0)}>
-              Massachusetts
+              Boston
             </span>
             <h1
               id="hero-heading"

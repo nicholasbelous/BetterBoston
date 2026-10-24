@@ -28,14 +28,20 @@ DEFAULT_SCENE_ID = "LC09_L2SP_012031_20240625_02_T1"
 DEFAULT_SCENE_DATE = "2024-06-25"
 DEFAULT_SCENE_PLATFORM = "landsat-9"
 
-# --- Demo neighborhoods (Requirement 1.3) -----------------------------------
-# Ordered: (name, (minLng, minLat, maxLng, maxLat)); same names, values, and
-# order as AREAS in pipeline/make_sample_data.py.
-DEMO_BBOXES = (
-    ("Chinatown", (-71.066, 42.346, -71.056, 42.354)),
-    ("West Roxbury", (-71.170, 42.270, -71.140, 42.290)),
-    ("East Boston", (-71.045, 42.365, -71.025, 42.385)),
+# --- Coverage: which cells are written out -----------------------------------
+# Every Boston cell is scored and ranked against the whole City of Boston. Only
+# cells whose center falls in a Boston neighborhood (BPDA boundaries) that is not
+# in EXCLUDED_NEIGHBORHOODS are written to data/scores/. Names must match the
+# BPDA layer exactly.
+NEIGHBORHOODS_URL = (
+    "https://gis.bostonplans.org/hosting/rest/services/Hosted/"
+    "Boston_Neighborhood_Boundaries/FeatureServer/5/query"
+    "?where=1%3D1&outFields=name&outSR=4326&f=geojson"
 )
+EXCLUDED_NEIGHBORHOODS = ("West Roxbury", "Harbor Islands")
+# A cell whose center misses every neighborhood polygon (shoreline slivers) takes
+# the nearest neighborhood within this many meters; farther cells are dropped.
+NEIGHBORHOOD_SNAP_M = 150
 
 # --- URLs (Requirement 1.5) -------------------------------------------------
 STAC_API_URL = "https://planetarycomputer.microsoft.com/api/stac/v1"
@@ -58,6 +64,7 @@ LOCAL_BAND_NAMES = {
 # --- Paths, relative to REPO_ROOT (Requirement 1.5) -------------------------
 WORK_DIR = Path("pipeline/work")
 BOSTON_GEOJSON = WORK_DIR / "boston.geojson"
+NEIGHBORHOODS_GEOJSON = WORK_DIR / "neighborhoods.geojson"
 SCENE_FILE = WORK_DIR / "scene.json"
 BAND_PATHS = {k: WORK_DIR / f"{k}.tif" for k in ASSET_KEYS}
 WORK_GRID = WORK_DIR / "demo_grid.geojson"

@@ -1,12 +1,12 @@
 # ClimateCheck MA
 
-**Type a Massachusetts address. See your block from above, how hot its ground got on a summer day, how green it is, what's happening there right now, and which real Massachusetts programs can help you.**
+**Type a Boston address. See your block from above, how hot its ground got on a summer day, how green it is, what's happening there right now, and which real Massachusetts programs can help you.**
 
 Built in one day at Hackachusetts 2026, Track 3: Climate Tech.
 
 ## The problem
 
-On the same summer day, some Boston blocks get far hotter than others. On June 25, 2024, the Landsat 9 satellite measured the ground on our Chinatown demo block at about 13°F hotter than the Boston average, while our West Roxbury block was about 3°F cooler. The free satellite data that shows this exists, but almost nobody can read it. Renters especially don't know which cooling centers, alerts, tree programs, or energy rebates they can use.
+On the same summer day, some Boston blocks get far hotter than others. On June 25, 2024, the Landsat 9 satellite measured the ground on our Chinatown demo block at about 13°F hotter than the Boston average, while a block on Perkins St in Jamaica Plain, next to Jamaica Pond, was about 15°F cooler. The free satellite data that shows this exists, but almost nobody can read it. Renters especially don't know which cooling centers, alerts, tree programs, or energy rebates they can use.
 
 ## What it does
 
@@ -20,7 +20,7 @@ On the same summer day, some Boston blocks get far hotter than others. On June 2
 5. **Get an action plan:** choose "I rent" or "I own." The plan uses only programs a person checked on their official pages (cooling centers, AlertBoston, street tree requests, Mass Save, community solar, heat pumps, SMART rooftop solar).
 6. **Climate map:** every scored block colored by heat or green cover, on top of the aerial photo.
 
-Scores cover three Boston neighborhoods with very different results: **Chinatown** (hot, paved), **East Boston** (hot, near the water), and **West Roxbury** (cooler, green). Anywhere else in Massachusetts, the report still shows the aerial photo and live conditions, and says "Coverage coming soon" in place of scores. It never shows an estimated score.
+Scores cover the **City of Boston**: 11,780 blocks (100 m cells) in 24 neighborhoods, from Brighton to Hyde Park. West Roxbury and the Harbor Islands are not scored (`EXCLUDED_NEIGHBORHOODS` in `pipeline/config.py`). Anywhere else, the report still shows the aerial photo and live conditions, and says "Coverage coming soon" in place of scores. It never shows an estimated score.
 
 ## Demo addresses
 
@@ -28,9 +28,10 @@ Scores cover three Boston neighborhoods with very different results: **Chinatown
 |---|---|---|---|
 | Chinatown (Hudson St) | 97 | about 13°F hotter | 5 |
 | East Boston (Meridian St) | 94 | about 11°F hotter | 5 |
-| West Roxbury (Centre St) | 31 | about 3°F cooler | 78 |
+| Beacon Hill (72 Beacon St) | 43 | about the same | 39 |
+| Jamaica Plain (Perkins St) | 8 | about 15°F cooler | 78 |
 
-Use the demo buttons on the home page. Typing "Centre St West Roxbury" can match Centre St in Roxbury instead, because of how the Census geocoder matches street names.
+Use the demo buttons on the home page.
 
 ## How it works
 
@@ -69,7 +70,7 @@ MassGIS 2025 aerial tiles ──────────────────
 - **Heat is the ground surface temperature on one summer day**, about 11:30 a.m. on June 25, 2024. It is not the air temperature you feel, and not an average.
 - **Green cover pixels are 30 m wide**, so grass, yards, and trees count together. We call it "green cover," not tree canopy.
 - **Scores compare blocks with each other** (against all 13,981 Boston cells). They are not official assessments.
-- **Scores cover three neighborhoods today.** 60 of the 976 scored cells don't have enough clear pixels, and they say so.
+- **Scores cover the City of Boston, except West Roxbury and the Harbor Islands.** 672 of the 11,780 scored cells don't have enough clear pixels, and they say so.
 - **Air quality is a model estimate**, not a monitor reading. Street tree counts include City trees only.
 - The aerial photo was taken in spring, before most trees had leaves. It's for seeing your block. Scores don't come from it.
 

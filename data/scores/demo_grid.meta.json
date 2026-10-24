@@ -1,27 +1,48 @@
 {
   "schema_version": 1,
   "is_sample": false,
-  "generated_at": "2026-10-24T20:42:27Z",
+  "generated_at": "2026-10-24T21:46:19Z",
   "generated_by": "pipeline/build_grid.py",
   "area": {
-    "name": "Boston demo areas",
+    "name": "City of Boston, except West Roxbury and Harbor Islands",
     "neighborhoods": [
+      "Allston",
+      "Back Bay",
+      "Bay Village",
+      "Beacon Hill",
+      "Brighton",
+      "Charlestown",
       "Chinatown",
-      "West Roxbury",
-      "East Boston"
+      "Dorchester",
+      "Downtown",
+      "East Boston",
+      "Fenway",
+      "Hyde Park",
+      "Jamaica Plain",
+      "Leather District",
+      "Longwood",
+      "Mattapan",
+      "Mission Hill",
+      "North End",
+      "Roslindale",
+      "Roxbury",
+      "South Boston",
+      "South Boston Waterfront",
+      "South End",
+      "West End"
     ],
     "bbox": [
-      -71.17,
-      42.27,
-      -71.025,
-      42.385
+      -71.175727,
+      42.227182,
+      -70.985059,
+      42.397121
     ]
   },
   "grid": {
     "cell_size_m": 100,
     "processing_crs": "EPSG:26919",
     "output_crs": "EPSG:4326",
-    "cell_count": 976
+    "cell_count": 11780
   },
   "heat": {
     "source": "Landsat 8/9 Collection 2 Level-2 surface temperature (USGS, via Microsoft Planetary Computer)",

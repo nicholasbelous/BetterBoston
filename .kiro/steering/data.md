@@ -51,7 +51,8 @@ vegetated = NDVI > NDVI_THRESHOLD     # configurable in pipeline/config.py
   - `tree_score`: percentile rank of `pct_vegetated`, 0-100. **Higher = greener.**
   - `heat_valid_frac` / `tree_valid_frac`: share of usable pixels, 0-1
 - If a valid fraction is below `min_valid_frac`, that score is `null`. The app shows "not enough clear data."
-- Reference areas: heat is compared with **Boston** (citywide mean from the same scene). Green cover is compared with the processed demo neighborhoods. Both are recorded in the metadata.
+- Reference areas: both scores rank each cell against **all Boston cells** (13,981 cells from the same scene). Both are recorded in the metadata.
+- Coverage: only cells whose center lies in a BPDA neighborhood outside `EXCLUDED_NEIGHBORHOODS` (West Roxbury, Harbor Islands) are published: 11,780 cells in 24 neighborhoods. Each cell's `neighborhood` is its BPDA neighborhood name. `pipeline/boston_boundary.py` saves the neighborhood polygons.
 
 ## Files
 

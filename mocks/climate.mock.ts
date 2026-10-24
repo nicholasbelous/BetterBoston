@@ -22,7 +22,7 @@ const AREAS: Record<
 > = {
   "Beacon Hill": { baseHeat: 66, baseTree: 34, anchorHeat: 82, anchorTree: 24, seed: 1.3 },
   Chinatown: { baseHeat: 80, baseTree: 16, anchorHeat: 91, anchorTree: 11, seed: 4.1 },
-  "West Roxbury": { baseHeat: 30, baseTree: 78, anchorHeat: 28, anchorTree: 84, seed: 2.7 },
+  "Jamaica Plain": { baseHeat: 30, baseTree: 78, anchorHeat: 12, anchorTree: 80, seed: 2.7 },
   "East Boston": { baseHeat: 58, baseTree: 38, anchorHeat: 62, anchorTree: 40, seed: 5.9 },
 };
 
@@ -117,7 +117,7 @@ export const MOCK_METADATA: ScoreMetadata = {
   area: {
     name: "Boston demo areas (MOCK)",
     neighborhoods: DEMO_ADDRESSES.map((a) => a.neighborhood),
-    bbox: [-71.19, 42.27, -71.02, 42.38],
+    bbox: [-71.13, 42.31, -71.02, 42.38],
   },
   grid: {
     cell_size_m: 100,
