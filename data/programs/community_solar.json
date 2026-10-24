@@ -1,0 +1,18 @@
+{
+  "category": "community_solar",
+  "programs": [
+    {
+      "id": "ma-community-solar",
+      "category": "community_solar",
+      "name": "Community solar subscriptions",
+      "description": "Community solar lets you get power from a solar farm without putting panels on your roof. Anyone who pays their own electric bill, including renters and condo owners, can join a community solar project. Subscribers can get credits on their electric bill. The Massachusetts Clean Energy Center (MassCEC) lists companies that offer subscriptions.",
+      "link": "https://goclean.masscec.com/renters/community-solar/",
+      "audience": ["renter", "owner"],
+      "topics": ["solar", "energy"],
+      "last_verified": null,
+      "details": {
+        "who": "Anyone who pays their own electric bill"
+      }
+    }
+  ]
+}

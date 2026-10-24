@@ -13,14 +13,16 @@ function optional(name: string): string | undefined {
 }
 
 export const config = {
-  awsRegion: optional("AWS_REGION") ?? "us-east-1",
-  bedrockModelId: optional("BEDROCK_MODEL_ID"),
+  anthropicApiKey: optional("ANTHROPIC_API_KEY"),
+  claudeModel: optional("CLAUDE_MODEL") ?? "claude-haiku-5-5",
   geocoderProvider: (optional("GEOCODER_PROVIDER") ?? "census") as GeocoderProvider,
   geocoderUserAgent: optional("GEOCODER_USER_AGENT") ?? "ClimateCheckMA/0.1",
   nominatimBaseUrl: optional("NOMINATIM_BASE_URL") ?? "https://nominatim.openstreetmap.org",
   allowUnverifiedPrograms: optional("ALLOW_UNVERIFIED_PROGRAMS") === "true",
+  /** Folder with demo_grid.geojson + demo_grid.meta.json, relative to the project root */
+  scoresDir: optional("SCORES_DIR") ?? "data/scores",
   googleSolarApiKey: optional("GOOGLE_SOLAR_API_KEY"),
 } as const;
 
-// TODO: validate GEOCODER_PROVIDER is one of the allowed values and fail
-// loudly at startup if BEDROCK_MODEL_ID is missing when /api/action-plan is called.
+// TODO: validate GEOCODER_PROVIDER is one of the allowed values.
+// lib/claude.ts already throws a clear error if ANTHROPIC_API_KEY is missing.
