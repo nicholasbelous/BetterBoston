@@ -2,6 +2,7 @@ import type { Metadata, Viewport } from "next";
 import Link from "next/link";
 import { Suspense } from "react";
 import BottomNav from "@/components/shell/BottomNav";
+import HeaderFallback from "@/components/shell/HeaderFallback";
 import SiteHeader from "@/components/shell/SiteHeader";
 import "./globals.css";
 
@@ -30,7 +31,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
           Skip to content
         </a>
         {/* Header and nav read the URL (?lat&lng&q) to keep the chosen place between screens. */}
-        <Suspense fallback={<div className="h-16" />}>
+        <Suspense fallback={<HeaderFallback />}>
           <SiteHeader />
         </Suspense>
         <main id="main" className="flex-1 pb-24 md:pb-12">
