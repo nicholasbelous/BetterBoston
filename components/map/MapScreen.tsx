@@ -42,7 +42,7 @@ export default function MapScreen({ initial }: { initial: LocationContext }) {
       cancelled = true;
     };
   }, []);
-  const gridIsSample = gridData?.isSample ?? true;
+  const gridIsSample = gridData?.isSample ?? false;
 
   function choose(next: Place) {
     setPlace(next);
@@ -86,12 +86,11 @@ export default function MapScreen({ initial }: { initial: LocationContext }) {
   return (
     // Fills the space between the header and the tab bar. Negative margin cancels <main>'s bottom padding.
     <div className="-mb-24 flex h-[calc(100dvh-7.5rem)] min-h-[34rem] flex-col md:-mb-12 md:h-[calc(100dvh-4rem)]">
-      <div className="shrink-0 px-3 py-2">
-        <SampleDataBanner
-          show={(report?.isSample ?? true) || gridIsSample}
-          note="The colored squares are sample scores. The aerial photo is real."
-        />
-      </div>
+      {(report?.isSample ?? false) || gridIsSample ? (
+        <div className="shrink-0 px-3 py-2">
+          <SampleDataBanner note="The colored squares are sample scores. The aerial photo is real." />
+        </div>
+      ) : null}
 
       <div className="relative min-h-0 flex-1 overflow-hidden border-t border-line">
         <MapView

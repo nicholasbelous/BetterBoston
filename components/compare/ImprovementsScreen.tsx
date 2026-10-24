@@ -60,7 +60,7 @@ export default function ImprovementsScreen({ initial }: { initial: LocationConte
 
       <div className="mb-4">
         <SampleDataBanner
-          show={data?.isSample ?? true}
+          show={data?.isSample ?? false}
           note="The pictures are illustrations and the benefits below are illustrative numbers, not predictions."
         />
       </div>

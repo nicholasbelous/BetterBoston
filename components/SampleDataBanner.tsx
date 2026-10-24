@@ -1,4 +1,4 @@
-// Banner shown on every page that displays scores while metadata.is_sample is true.
+// Banner shown on every page that displays scores once the loaded metadata says is_sample.
 // Sample data must never look like real results.
 import Icon from "@/components/ui/Icon";
 

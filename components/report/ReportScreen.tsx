@@ -176,7 +176,7 @@ export default function ReportScreen({ initial }: { initial: LocationContext }) 
 
       <div className="mb-4">
         <SampleDataBanner
-          show={data?.isSample ?? true}
+          show={data?.isSample ?? false}
           note="The aerial photo and the local conditions are real."
         />
       </div>
