@@ -1,0 +1,145 @@
+{
+  "_comment": "The ONLY programs the action plan may recommend. Claude picks from this list and writes the 'why' line; titles, buttons and links always come from here. Before the demo, check every entry and set 'verified' to true. Replace each top-level URL with the exact program page.",
+  "programs": [
+    {
+      "id": "cooling_centers",
+      "roles": [
+        "renter",
+        "owner"
+      ],
+      "title": "Find your nearest cooling center",
+      "default_why": "On heat emergency days, cooling centers give you a safe, cool place to go.",
+      "why_if": {
+        "heat_high": "Your block stays hot into the night. Cooling centers open on heat emergency days."
+      },
+      "cta_label": "Get directions",
+      "url": "https://www.boston.gov",
+      "tag": null,
+      "icon": "snowflake",
+      "good_when": [
+        "heat_high"
+      ],
+      "verified": false
+    },
+    {
+      "id": "street_tree",
+      "roles": [
+        "renter",
+        "owner"
+      ],
+      "title": "Request a free street tree",
+      "default_why": "Trees shade about {canopy_pct}% of your block. Boston plants street trees for free when residents ask.",
+      "why_if": {
+        "trees_low": "Trees shade only about {canopy_pct}% of your block. Boston plants street trees for free when residents ask."
+      },
+      "cta_label": "Request from the City",
+      "url": "https://www.boston.gov",
+      "tag": null,
+      "icon": "tree",
+      "good_when": [
+        "trees_low"
+      ],
+      "verified": false
+    },
+    {
+      "id": "community_solar",
+      "roles": [
+        "renter"
+      ],
+      "title": "Join community solar and save on your bill",
+      "default_why": "No roof needed. Renters can sign up and get a credit on their electric bill.",
+      "cta_label": "See options",
+      "url": "https://www.mass.gov",
+      "tag": null,
+      "icon": "sun",
+      "good_when": [
+        "always"
+      ],
+      "verified": false
+    },
+    {
+      "id": "heat_alerts",
+      "roles": [
+        "renter",
+        "owner"
+      ],
+      "title": "Sign up for heat alerts",
+      "default_why": "Get a text when Boston declares a heat emergency, so you can plan ahead.",
+      "cta_label": "Sign up",
+      "url": "https://www.boston.gov",
+      "tag": null,
+      "icon": "bell",
+      "good_when": [
+        "heat_high",
+        "always"
+      ],
+      "verified": false
+    },
+    {
+      "id": "heat_pump",
+      "roles": [
+        "owner"
+      ],
+      "title": "Get a heat pump with AC",
+      "default_why": "Cools your whole home on hot nights and heats it in winter, too.",
+      "cta_label": "See rebates",
+      "url": "https://www.masssave.com",
+      "tag": "Mass Save rebate available",
+      "icon": "wind",
+      "good_when": [
+        "heat_high",
+        "always"
+      ],
+      "verified": false
+    },
+    {
+      "id": "cool_roof",
+      "roles": [
+        "owner"
+      ],
+      "title": "Switch to a cool roof",
+      "default_why": "Your roof looks dark in aerial photos. A light roof reflects sun and keeps top floors cooler.",
+      "cta_label": "Learn about cool roofs",
+      "url": null,
+      "tag": "Est. savings: [$ per year]",
+      "icon": "roof",
+      "good_when": [
+        "roof_dark"
+      ],
+      "verified": false
+    },
+    {
+      "id": "yard_trees",
+      "roles": [
+        "owner"
+      ],
+      "title": "Plant trees on your property",
+      "default_why": "Shade on the south and west sides of your home cools it the most.",
+      "cta_label": "Find a tree program",
+      "url": null,
+      "tag": "Free trees may be available",
+      "icon": "tree",
+      "good_when": [
+        "trees_low",
+        "always"
+      ],
+      "verified": false
+    },
+    {
+      "id": "rooftop_solar",
+      "roles": [
+        "owner"
+      ],
+      "title": "Add rooftop solar",
+      "default_why": "Make your own power and lower your electric bill. Your roof's sun score is coming soon.",
+      "cta_label": "See options",
+      "url": "https://www.mass.gov",
+      "tag": "Incentives available",
+      "icon": "sun",
+      "good_when": [
+        "always"
+      ],
+      "verified": false
+    }
+  ]
+}

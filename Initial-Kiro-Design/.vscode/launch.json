@@ -1,0 +1,22 @@
+{
+  // Run and Debug panel: "Debug backend" lets you set breakpoints in the Python code.
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "Debug backend (FastAPI)",
+      "type": "debugpy",
+      "request": "launch",
+      "module": "uvicorn",
+      "args": ["app.main:app", "--reload", "--port", "8000"],
+      "cwd": "${workspaceFolder}/backend",
+      "jinja": true
+    },
+    {
+      "name": "Open frontend in Chrome",
+      "type": "chrome",
+      "request": "launch",
+      "url": "http://localhost:5173",
+      "webRoot": "${workspaceFolder}/frontend"
+    }
+  ]
+}

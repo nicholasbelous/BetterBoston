@@ -1,0 +1,37 @@
+{
+  "_comment": "Illustrative sample values for the demo. Replace with output from app/pipeline once the real data is processed.",
+  "city_avg_surface_temp_f": 96,
+  "coolest_neighborhood_surface_temp_f": 88,
+  "blocks": [
+    {
+      "block_id": "sample-chinatown",
+      "match": ["hudson st", "chinatown"],
+      "label": "Hudson St, Chinatown",
+      "city_line": "Boston, MA 02111",
+      "neighborhood": "Chinatown",
+      "lat": 42.3497,
+      "lon": -71.0605,
+      "heat_score": 82,
+      "block_surface_temp_f": 105,
+      "tree_score": 18,
+      "canopy_pct": 8,
+      "roof_is_dark": true,
+      "pavement_heavy": true
+    },
+    {
+      "block_id": "sample-west-roxbury",
+      "match": ["centre st, west roxbury", "west roxbury"],
+      "label": "Centre St, West Roxbury",
+      "city_line": "Boston, MA 02132",
+      "neighborhood": "West Roxbury",
+      "lat": 42.2830,
+      "lon": -71.1590,
+      "heat_score": 34,
+      "block_surface_temp_f": 92,
+      "tree_score": 71,
+      "canopy_pct": 38,
+      "roof_is_dark": false,
+      "pavement_heavy": false
+    }
+  ]
+}

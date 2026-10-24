@@ -1,0 +1,19 @@
+# Python
+backend/.venv/
+__pycache__/
+.pytest_cache/
+*.pyc
+
+# Secrets
+.env
+
+# Node
+frontend/node_modules/
+frontend/dist/
+
+# Data you download for the pipeline (often huge)
+backend/data_raw/
+
+# OS / editor
+.DS_Store
+*.tsbuildinfo

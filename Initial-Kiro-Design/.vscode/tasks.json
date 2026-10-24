@@ -1,0 +1,55 @@
+{
+  // Terminal > Run Task… > "Start app (backend + frontend)"
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "Setup: backend",
+      "type": "shell",
+      "options": { "cwd": "${workspaceFolder}/backend" },
+      "command": "python3 -m venv .venv && .venv/bin/pip install -r requirements.txt",
+      "windows": { "command": "py -m venv .venv; .venv\\Scripts\\pip install -r requirements.txt" },
+      "problemMatcher": []
+    },
+    {
+      "label": "Setup: frontend",
+      "type": "shell",
+      "options": { "cwd": "${workspaceFolder}/frontend" },
+      "command": "npm install",
+      "problemMatcher": []
+    },
+    {
+      "label": "Backend: FastAPI (port 8000)",
+      "type": "shell",
+      "options": { "cwd": "${workspaceFolder}/backend" },
+      "command": ".venv/bin/uvicorn app.main:app --reload --port 8000",
+      "windows": { "command": ".venv\\Scripts\\uvicorn app.main:app --reload --port 8000" },
+      "isBackground": true,
+      "problemMatcher": [],
+      "presentation": { "group": "app", "panel": "dedicated" }
+    },
+    {
+      "label": "Frontend: Vite (port 5173)",
+      "type": "shell",
+      "options": { "cwd": "${workspaceFolder}/frontend" },
+      "command": "npm run dev",
+      "isBackground": true,
+      "problemMatcher": [],
+      "presentation": { "group": "app", "panel": "dedicated" }
+    },
+    {
+      "label": "Start app (backend + frontend)",
+      "dependsOn": ["Backend: FastAPI (port 8000)", "Frontend: Vite (port 5173)"],
+      "dependsOrder": "parallel",
+      "problemMatcher": []
+    },
+    {
+      "label": "Backend: run tests",
+      "type": "shell",
+      "options": { "cwd": "${workspaceFolder}/backend" },
+      "command": ".venv/bin/python -m pytest -q",
+      "windows": { "command": ".venv\\Scripts\\python -m pytest -q" },
+      "group": "test",
+      "problemMatcher": []
+    }
+  ]
+}
