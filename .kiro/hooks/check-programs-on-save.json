@@ -1,0 +1,16 @@
+{
+  "version": "v1",
+  "hooks": [
+    {
+      "name": "Check program facts",
+      "trigger": "PostFileSave",
+      "description": "When a program file in data/programs/ is saved, check that every link loads and every phone number, email, and dollar amount appears on the official page.",
+      "matcher": "data/programs/.*\\.json$",
+      "action": {
+        "type": "command",
+        "command": "npm run --silent check:programs",
+        "timeout": 120
+      }
+    }
+  ]
+}
