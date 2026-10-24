@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
+import Brand from "@/components/shell/Brand";
 import { NAV_ITEMS, isActive } from "@/components/shell/navItems";
 import Icon from "@/components/ui/Icon";
 import { useScreenHref } from "@/hooks/useScreenHref";
@@ -26,12 +27,7 @@ export default function SiteHeader() {
   return (
     <header className="sticky top-0 z-40 border-b border-line bg-navy-950/80 backdrop-blur-xl">
       <div className="mx-auto flex h-16 w-full max-w-6xl items-center justify-between gap-4 px-5">
-        <Link href="/" className="flex items-center gap-2.5 rounded-lg" aria-label="ClimateCheck MA home">
-          <span className="grid size-8 place-items-center rounded-lg bg-mint-tint text-mint">
-            <Icon name="leaf" size={20} />
-          </span>
-          <span className="font-display text-[17px] font-semibold tracking-tight">ClimateCheck MA</span>
-        </Link>
+        <Brand />
 
         <nav aria-label="Main" className="hidden items-center gap-1 md:flex">
           {NAV_ITEMS.map((item) => {

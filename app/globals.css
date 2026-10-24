@@ -65,6 +65,26 @@ body {
   outline-offset: 2px;
 }
 
+/*
+  Landing hero photo: fade its edge into the real page background (including the blue glow)
+  with a mask, so there is no visible seam. Phones fade the top, desktop fades the left.
+*/
+.hero-photo-mask {
+  /* Eased (smoothstep-like) ramp so the fade has no visible start or end line. */
+  --hero-fade: transparent 0%, rgb(0 0 0 / 0.03) 4%, rgb(0 0 0 / 0.1) 9%, rgb(0 0 0 / 0.24) 15%,
+    rgb(0 0 0 / 0.43) 21%, rgb(0 0 0 / 0.66) 27%, rgb(0 0 0 / 0.86) 33%, rgb(0 0 0 / 0.96) 38%, #000 44%;
+  -webkit-mask-image: linear-gradient(to bottom, var(--hero-fade));
+  mask-image: linear-gradient(to bottom, var(--hero-fade));
+}
+@media (min-width: 64rem) {
+  .hero-photo-mask {
+    --hero-fade: transparent 0%, rgb(0 0 0 / 0.03) 6%, rgb(0 0 0 / 0.1) 13%, rgb(0 0 0 / 0.24) 21%,
+      rgb(0 0 0 / 0.43) 30%, rgb(0 0 0 / 0.66) 39%, rgb(0 0 0 / 0.86) 48%, rgb(0 0 0 / 0.96) 56%, #000 64%;
+    -webkit-mask-image: linear-gradient(to right, var(--hero-fade));
+    mask-image: linear-gradient(to right, var(--hero-fade));
+  }
+}
+
 /* Heat gradient used by the legend and the map ramp (low risk -> high risk). */
 .heat-gradient {
   background: linear-gradient(
