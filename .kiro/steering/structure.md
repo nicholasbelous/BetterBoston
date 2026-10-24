@@ -2,15 +2,15 @@
 
 ```
 app/                     Next.js App Router (Person 1 owns pages; Person 3 owns app/api/)
-  page.tsx               Home: address search + "use my location"
-  report/page.tsx        Report: map, score cards, renter/owner toggle, action plan
+  page.tsx               Home: address search
+  report/page.tsx        Report: map, score cards, action plan (one plan for everyone)
   about/page.tsx         Data sources, methods, limitations
   api/geocode/route.ts   GET  ?q=        -> LocationResult
   api/score/route.ts     GET  ?lat&lng   -> ScoreLookupResponse
   api/grid/route.ts      GET             -> GridResponse (all cells, for map colors)
   api/live/route.ts      GET  ?lat&lng   -> LiveBundle (every live source)
   api/live/[source]/route.ts GET ?lat&lng -> LiveResult for one source
-  api/action-plan/route.ts POST {cell_id, tenure} -> ActionPlan
+  api/action-plan/route.ts POST {cell_id, tenure: renter|owner|everyone} -> ActionPlan
 components/              UI components (Person 1)
 lib/                     Server logic + shared types (Person 3; score types owned by Person 2)
   types.ts               Shared types. The contract between everyone

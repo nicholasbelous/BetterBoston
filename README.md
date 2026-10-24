@@ -2,7 +2,20 @@
 
 **Type a Boston address. See your block from above, how hot its ground got on a summer day, how green it is, what's happening there right now, and which real Massachusetts programs can help you.**
 
-Built in one day at Hackachusetts 2026, Track 3: Climate Tech.
+Built in one day at Hackachusetts 2026.
+
+- **Track:** Climate Tech (Climatech & Clean Energy)
+- **Live demo:** https://betterboston.vercel.app (free, no login)
+- **Built with:** Kiro (IDE, CLI, Web, Crew), Next.js 16, Python, Landsat 9, Claude
+
+## Try it (for judges)
+
+1. Open https://betterboston.vercel.app on a phone or a computer. No account or key is needed.
+2. Type a Boston address, for example `Hudson St, Boston` (one of the hottest blocks) or `Perkins St, Jamaica Plain` (one of the coolest), and press the arrow.
+3. On the **Climate map**, switch between **Heat** and **Green** and tap other blocks.
+4. Press **View Climate Report** to see the aerial photo, both scores with their sources, live conditions (weather, heat alerts, air quality, flood zone, street trees, places to cool off), and the **Recommendations** tab with the action plan.
+
+To run it yourself, see [Run it](#run-it).
 
 ## The problem
 
@@ -120,24 +133,66 @@ The score grid and program list in `data/` are read from disk by the API routes 
 
 ## How we used Kiro
 
-We built the whole project in Kiro, with three people working in parallel on the frontend, the data pipeline, and the backend.
+We built BetterBoston with Kiro, with three people working in parallel on the frontend, the Landsat data pipeline, and the backend. Everything Kiro used is in [`.kiro/`](.kiro/).
 
-- **Steering files** ([`.kiro/steering/`](.kiro/steering/)) hold the rules every Kiro session on the team followed:
-  - `product.md`: who the users are, the 8th-grade reading level, and our honesty rules. Heat is "the ground," never "the air." Never show a made-up score. The AI may only cite checked programs. The photo is an "aerial photo," never a "satellite image."
-  - `data.md`: the Landsat formulas, QA masks, coordinate systems, score definitions, and the rules for each live data source.
-  - `tech.md` and `structure.md`: the stack, conventions, and who owns which files, so parallel Kiro sessions didn't overwrite each other.
-- **Specs** ([`.kiro/specs/`](.kiro/specs/)):
-  - `betterboston-mvp`: requirements in WHEN/SHALL form, a design with every API contract and the AI output schema, and numbered tasks that match `TODO (task X.Y)` comments in the code.
-  - `landsat-data-pipeline`: the pipeline was built spec-first (requirements → design → tasks). Its property-based tests (Hypothesis) caught a 0-D scalar bug in the QA mask and NDVI functions before any real data ran.
-- **Hooks** ([`.kiro/hooks/`](.kiro/hooks/)):
-  - Saving or creating a file in `data/scores/` runs the score validator, so sample data can never be marked real.
-  - Saving a file in `data/programs/` runs the program fact checker.
-- **Agent work we can point to:**
-  - Picked the Landsat scene by comparing cloud cover over each neighborhood (June 25, 2024 beat July 30, 2025).
-  - Tested every public API against Boston addresses before we built on it.
-  - Found and fixed a bug where every map drew blank: Turbopack resolved MapLibre's worker to the wrong file, and MapLibre's CSS collapsed the map to 0 px tall.
-  - Audited the merged frontend against our honesty rules: removed invented numbers, fixed "tree canopy" wording, and replaced placeholder flood and air tiles with live data.
-  - Added a GitHub Actions CI workflow that runs the same checks as `npm run check`.
+### Kiro tools
+
+We used **Kiro IDE**, **Kiro CLI**, **Kiro Web**, and **Kiro Crew**. The IDE was the main workspace. It ran the specs task by task, the hooks, and the steering below. The pipeline spec's task history ([`tasks.meta.json`](.kiro/specs/landsat-data-pipeline/tasks.meta.json)) shows each task group run in its own Kiro session, with every property test recorded as passed.
+
+### Spec-driven development
+
+We wrote two specs, at two different sizes:
+
+- **[`betterboston-mvp`](.kiro/specs/betterboston-mvp/)** is the contract between the three of us. `requirements.md` uses WHEN/SHALL statements, including the honesty rules (for example "The app SHALL NOT compute, estimate, or adjust any score. Scores come only from `data/scores/`."). `design.md` fixes every API route, the GeoJSON score schema, and the AI output schema up front. `tasks.md` is numbered, and the numbers match `TODO (task X.Y)` comments in the code, so anyone could see what was done and what was open.
+- **[`landsat-data-pipeline`](.kiro/specs/landsat-data-pipeline/)** was built requirements-first (requirements → design → tasks). The design lists numbered correctness properties (for example "Property 5: QA mask is the bit test"), and each one became a property-based test task.
+
+**Compared with vibe coding:** our first prototype ([`Initial-Kiro-Design/`](Initial-Kiro-Design/)) ran end to end, but the hard part, the satellite processing, was a stub. With the spec, the pipeline came out as small tested functions that matched a fixed output schema. The web app could use the real data as soon as it landed, without changing any code. The shared design doc also meant the frontend and backend could be built at the same time against the same types.
+
+### Agent hooks
+
+Three hooks in [`.kiro/hooks/`](.kiro/hooks/) guard the two things that would hurt users most if they were wrong:
+
+- **Validate score data** (on save and on create in `data/scores/`): runs the schema validator, which also checks that sample data can never be marked real. The hook skips cleanly until the validator exists, so it could be committed before the pipeline was written.
+- **Check program facts** (on save in `data/programs/`): opens every program link and checks that each phone number, email, and dollar amount in our record really appears on the official page. The AI may only cite these programs, so this is what keeps its advice true.
+
+These checks run every time someone, or the agent, edits those files, not only when someone remembers to run them.
+
+### Steering docs
+
+Four files in [`.kiro/steering/`](.kiro/steering/) are loaded into every Kiro session on the team:
+
+- `product.md`: the users, an 8th-grade reading level, and honesty rules. Heat is "the ground," never "the air." Never show a made-up score. The AI may only cite checked programs. The photo is an "aerial photo," never a "satellite image."
+- `data.md`: the Landsat formulas, QA masks, coordinate systems, score definitions, and rules for each live source.
+- `tech.md` and `structure.md`: the stack, conventions, and **who owns which files**.
+
+The strategy that helped most was the file-ownership map in `structure.md`. Three people ran Kiro at the same time on one repo, and each session knew which folders it could change, so they didn't overwrite each other. The honesty rules in `product.md` came second: they made Kiro write "ground temperature" and "green cover" consistently and refuse to fill gaps with estimates.
+
+### Property-based testing
+
+The pipeline spec defines 10 correctness properties, covered by 13 property-based tests ([Hypothesis](https://hypothesis.readthedocs.io/), `pipeline/tests/`):
+
+- Landsat number-to-temperature conversions match the Collection 2 formulas.
+- NDVI is float32, clipped to [-1, 1], and NaN where it's undefined.
+- The QA cloud mask is exactly the bit test.
+- Percentile ranks are bounded, monotone, consistent on ties, unaffected by NaN, and match a reference implementation.
+- Scoring functions never change their inputs.
+- The minimum-valid-pixel threshold is inclusive.
+- Clear-pixel fraction and median temperature are correct.
+- **Every grid the pipeline writes passes the web app's validator.**
+
+They generate arrays of every shape from 0-D up to 4-D, including empty ones. This caught a bug that our hand-written unit tests missed: on 0-D input, the QA mask and NDVI functions returned a numpy scalar instead of an array. It was fixed before any real data ran. Run them with `python -m pytest pipeline/tests`.
+
+### MCP and Kiro powers
+
+We didn't use MCP servers or Kiro powers. Every outside source the app needs (Landsat on Planetary Computer, NWS, Open-Meteo, FEMA, Analyze Boston, the Census geocoder) is a public HTTP API that the app calls itself, so the agent could test them directly with shell commands.
+
+### Agent work we can point to
+
+- Picked the Landsat scene by comparing cloud cover over each neighborhood (June 25, 2024 beat July 30, 2025).
+- Tested every public API against Boston addresses before we built on it.
+- Found and fixed a bug where every map drew blank: Turbopack resolved MapLibre's worker to the wrong file, and MapLibre's CSS collapsed the map to 0 px tall.
+- Audited the merged frontend against our honesty rules: removed invented numbers, fixed "tree canopy" wording, and replaced placeholder flood and air tiles with live data.
+- Added a GitHub Actions CI workflow that runs the same checks as `npm run check`.
 
 ## Project layout
 
@@ -153,12 +208,12 @@ pipeline/       Python Landsat pipeline + tests
 docs/           Team plan from hackathon day
 ```
 
-`Initial-Kiro-Design/` is an earlier FastAPI + Vite prototype, kept for reference only.
+`Initial-Kiro-Design/` is our first prototype (FastAPI + Vite, with the satellite processing stubbed out), kept to show where the specs started. The live app doesn't use it.
 
 ## Team
 
-| Role | Name |
+| Name | Role |
 |---|---|
-| Frontend + demo video | [NAME] (landing page redesign: Mohammed Komou) |
-| Data pipeline (Landsat heat + green cover) | [NAME] (GitHub: Oliverdhz) |
-| Backend, live data, AI, Kiro | [NAME] (GitHub: nicholasbelous) |
+| Nicholas Belous ([@nicholasbelous](https://github.com/nicholasbelous)) | Backend, live data, AI action plan, Kiro setup |
+| Oliver Hernandez ([@Oliverdhz](https://github.com/Oliverdhz)) | Landsat data pipeline (heat and green cover) |
+| Mohammed Komou | Frontend and landing page design | 

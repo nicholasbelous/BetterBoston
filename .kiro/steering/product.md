@@ -9,14 +9,14 @@ A mobile-first web app that turns satellite and aerial imagery into a plain-Engl
 
 ## What the app does
 
-1. The user types an address or taps "use my location."
+1. The user types an address.
 2. The app shows the MassGIS 2025 aerial photo of the home and block. The photo works for any Massachusetts address, even outside the scored area, where the scores still say "coverage coming soon." It was taken from a plane: call it an "aerial photo," never a "satellite image."
 3. Score cards:
    - **Heat**: how hot the block's ground surface got on one hot summer day, compared with the Boston average (Landsat thermal data).
    - **Green cover**: how green the block is (NDVI from the same June 25, 2024 Landsat image, 30 m pixels, trees in leaf). Grass and trees count together, so still say "green cover," not "tree canopy."
    - **Solar potential**: stretch goal only.
 4. A personalized action plan in plain English, built **only** from the curated program data in `data/programs/`.
-5. A renter/owner toggle changes the plan. Renters get cooling centers, alerts, tree requests, energy assessments, and community solar. Owners also get heat pumps and rooftop solar.
+5. One plan for everyone (no rent/own question): cooling centers, alerts, tree requests, energy assessments, community solar, plus heat pumps and rooftop solar, which the plan says are for homeowners. The API still accepts `tenure: "renter" | "owner"` for the Actions page.
 
 ## Honesty rules (never break these)
 
