@@ -97,13 +97,13 @@ Build the pipeline as small Python 3 scripts in `pipeline/`, in the order set by
     - `[1, 2, 3]` → `[0, 50, 100]`; `[1, 1, 2]` → `[25, 25, 100]`; single value → 50; empty → empty; `apply_min_valid` at exactly 0.5
     - _Requirements: 4.7, 4.8, 4.13, 4.16_
 
-- [~] 4. Implement raster helpers and the Landsat fetcher
-  - [-] 4.1 Add raster functions to `pipeline/raster_io.py`
+- [x] 4. Implement raster helpers and the Landsat fetcher
+  - [x] 4.1 Add raster functions to `pipeline/raster_io.py`
     - `Band` dataclass, `WindowError`, `window_read` (transform_bounds, from_bounds, round, intersect, reject empty window), `open_band`, `check_alignment`, `load_boundary`, `inside_mask` (`geometry_mask`, `all_touched=False`), `write_band` (same dtype/CRS/transform/nodata, DEFLATE, temp file + `os.replace`)
     - `window_read` is the only source-pixel read path; wrap remote reads in `rasterio.Env(GDAL_DISABLE_READDIR_ON_OPEN="EMPTY_DIR")`
     - _Requirements: 5.11, 6.2, 6.3, 6.10, 6.11, 6.13, 7.1, 7.9_
 
-  - [ ] 4.2 Create `pipeline/fetch_landsat.py`
+  - [x] 4.2 Create `pipeline/fetch_landsat.py`
     - `FetchError`, `read_scene_id`, `match_local_bands` (whole-token match, `.tif`/`.TIF`, missing or ambiguous raises), `fetch_stac_bands`, `fetch_local_bands`, `default_scene_json`, `main` with `--local DIR`
     - Follow the design flow: `require_boston_bbox` → scene ID → read all four windows → alignment check → Clear_Fraction (warn below 0.95, point to `find_scene.py`) → write four GeoTIFFs → write default Scene_File only if absent
     - No file is written before all checks pass; existing Scene_File is never opened for writing; errors name the item ID, band, or asset key
@@ -129,8 +129,8 @@ Build the pipeline as small Python 3 scripts in `pipeline/`, in the order set by
     - `--local` run on synthetic TIFs writes four bands and the default Scene_File; existing Scene_File stays byte-identical; window outside raster names the band and writes nothing; low Clear_Fraction warns and exits 0
     - _Requirements: 6.4, 6.6, 6.7, 6.8, 6.13_
 
-- [ ] 5. Implement the grid builder
-  - [ ] 5.1 Create `pipeline/build_grid.py` with scene parsing and pixel helpers
+- [~] 5. Implement the grid builder
+  - [x] 5.1 Create `pipeline/build_grid.py` with scene parsing and pixel helpers
     - `SceneInfo`, `CellStats`, `SceneError`; `parse_scene` (non-empty `id`, `date` matching `^\d{4}-\d{2}-\d{2}$` and `date.fromisoformat`), `pixel_centers`, `classify_pixels`, `assign_cells`, `aggregate` (`np.unique` + `np.bincount`, unrounded values)
     - _Requirements: 7.2, 7.3, 7.4, 7.5, 7.6, 7.7, 7.8, 10.9_
 
@@ -154,7 +154,7 @@ Build the pipeline as small Python 3 scripts in `pipeline/`, in the order set by
     - **Property 21: Aggregation matches a naive per-cell model**
     - **Validates: Requirements 7.3, 7.5, 7.6, 7.7, 7.8**
 
-  - [ ] 5.7 Add `score_cells` to `pipeline/build_grid.py`
+  - [x] 5.7 Add `score_cells` to `pipeline/build_grid.py`
     - `ScoredCells`, `EmptyReferenceSet`; unrounded `>= MIN_VALID_FRAC` reference sets, round before ranking, `reference_mean_f`, `temp_diff_f` from rounded values, independent heat/tree null rules, ranking over all Boston_Cells
     - _Requirements: 8.1, 8.2, 8.3, 8.4, 8.5, 8.6, 8.7, 8.8_
 
@@ -162,7 +162,7 @@ Build the pipeline as small Python 3 scripts in `pipeline/`, in the order set by
     - **Property 22: Reference statistics and null rules**
     - **Validates: Requirements 8.1, 8.2, 8.5, 8.6, 8.8**
 
-  - [ ] 5.9 Add geometry, demo selection, and cell properties to `pipeline/build_grid.py`
+  - [-] 5.9 Add geometry, demo selection, and cell properties to `pipeline/build_grid.py`
     - `DemoCell`, `EmptyDemoAreas`; `cell_ring`, `ring_bbox`, `cell_id`, `demo_neighborhood` (inclusive, first match in config order), `select_demo_cells` (sorted by bbox order, northing, easting), `cell_properties` (exact key order, Python `round`, `None` for null, `is_sample: False`), `build_feature`, `build_grid_obj`
     - _Requirements: 9.1, 9.2, 9.3, 9.4, 9.5, 9.6, 9.7, 9.8, 9.9, 9.11_
 

@@ -232,6 +232,61 @@
         "executionId": "c3929e28-50ec-41bf-a37f-cefbd85af605",
         "chatSessionId": "sess_8a82e19c-cb01-4505-911b-5d8e0d992619",
         "timestamp": 1792872912890
+      },
+      {
+        "executionId": "c3929e28-50ec-41bf-a37f-cefbd85af605",
+        "chatSessionId": "sess_8a82e19c-cb01-4505-911b-5d8e0d992619",
+        "timestamp": 1792873173392
+      }
+    ],
+    "4.2 Create `pipeline/fetch_landsat.py`": [
+      {
+        "executionId": "c3929e28-50ec-41bf-a37f-cefbd85af605",
+        "chatSessionId": "sess_8a82e19c-cb01-4505-911b-5d8e0d992619",
+        "timestamp": 1792873173998
+      },
+      {
+        "executionId": "c3929e28-50ec-41bf-a37f-cefbd85af605",
+        "chatSessionId": "sess_8a82e19c-cb01-4505-911b-5d8e0d992619",
+        "timestamp": 1792873375850
+      }
+    ],
+    "4. Implement raster helpers and the Landsat fetcher": [
+      {
+        "executionId": "c3929e28-50ec-41bf-a37f-cefbd85af605",
+        "chatSessionId": "sess_8a82e19c-cb01-4505-911b-5d8e0d992619",
+        "timestamp": 1792873376058
+      }
+    ],
+    "5.1 Create `pipeline/build_grid.py` with scene parsing and pixel helpers": [
+      {
+        "executionId": "f9b37a96-7530-4056-a12c-73c2af0a4f72",
+        "chatSessionId": "sess_5f6132d4-be2b-474a-bf01-1ef6f717bc04",
+        "timestamp": 1792873480966
+      },
+      {
+        "executionId": "f9b37a96-7530-4056-a12c-73c2af0a4f72",
+        "chatSessionId": "sess_5f6132d4-be2b-474a-bf01-1ef6f717bc04",
+        "timestamp": 1792873637834
+      }
+    ],
+    "5.7 Add `score_cells` to `pipeline/build_grid.py`": [
+      {
+        "executionId": "f9b37a96-7530-4056-a12c-73c2af0a4f72",
+        "chatSessionId": "sess_5f6132d4-be2b-474a-bf01-1ef6f717bc04",
+        "timestamp": 1792873638615
+      },
+      {
+        "executionId": "f9b37a96-7530-4056-a12c-73c2af0a4f72",
+        "chatSessionId": "sess_5f6132d4-be2b-474a-bf01-1ef6f717bc04",
+        "timestamp": 1792873830848
+      }
+    ],
+    "5.9 Add geometry, demo selection, and cell properties to `pipeline/build_grid.py`": [
+      {
+        "executionId": "f9b37a96-7530-4056-a12c-73c2af0a4f72",
+        "chatSessionId": "sess_5f6132d4-be2b-474a-bf01-1ef6f717bc04",
+        "timestamp": 1792873831819
       }
     ]
   }
