@@ -129,7 +129,7 @@ export default function AddressSearch() {
             </li>
           ))}
         </ul>
-        <p className="mt-1.5 px-5 text-[11px] leading-snug text-ink-mute lg:px-0">
+        <p className="mt-1.5 px-5 text-[11px] leading-snug text-ink-dim [text-shadow:0_1px_6px_rgb(6_15_22/0.95)] lg:px-0">
           Scores cover Chinatown, West Roxbury, and East Boston for now. Aerial photos work statewide.
         </p>
       </div>

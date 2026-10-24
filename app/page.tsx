@@ -28,10 +28,33 @@ export default function HomePage() {
         aria-labelledby="hero-heading"
         className="relative isolate flex min-h-[calc(100dvh-4rem)] flex-col overflow-hidden lg:min-h-[min(calc(100dvh-4rem),54rem)] lg:justify-center"
       >
-        {/* soft ocean-blue glow behind the headline */}
+        {/* Full-bleed Boston skyline behind everything, slowly drifting. */}
+        <div aria-hidden="true" className="absolute inset-0 -z-20 overflow-hidden">
+          <Image
+            src="/images/boston-skyline.jpg"
+            alt=""
+            fill
+            priority
+            sizes="100vw"
+            className="hero-drift object-cover object-[50%_58%] lg:object-[50%_52%]"
+          />
+        </div>
+        {/*
+          Shading: navy at the top (phones) or left (desktop) so the white headline reads over a
+          bright sky, the city stays visible in the middle, and the bottom melts into the page.
+        */}
         <div
           aria-hidden="true"
-          className="pointer-events-none absolute inset-0 -z-10 bg-[radial-gradient(46rem_30rem_at_12%_6%,rgb(32_104_168/0.30),transparent_68%)]"
+          className="pointer-events-none absolute inset-0 -z-10 bg-[linear-gradient(180deg,rgb(6_15_22/0.94)_0%,rgb(6_15_22/0.82)_34%,rgb(6_15_22/0.35)_58%,rgb(6_15_22/0.25)_70%,var(--color-navy-950)_100%)] lg:bg-[linear-gradient(90deg,rgb(6_15_22/0.95)_0%,rgb(6_15_22/0.86)_34%,rgb(6_15_22/0.35)_62%,rgb(6_15_22/0.15)_100%)]"
+        />
+        <div
+          aria-hidden="true"
+          className="pointer-events-none absolute inset-x-0 bottom-0 -z-10 hidden h-48 bg-gradient-to-t from-navy-950 to-transparent lg:block"
+        />
+        {/* mint glow, echoing the app's accent color */}
+        <div
+          aria-hidden="true"
+          className="hero-glow pointer-events-none absolute inset-0 -z-10 bg-[radial-gradient(40rem_26rem_at_10%_0%,rgb(62_230_180/0.16),transparent_70%)]"
         />
 
         {/* copy + search */}
@@ -58,37 +81,11 @@ export default function HomePage() {
           </div>
         </div>
 
-        {/* coastal photograph: fills the rest of the first screen on phones, right side on desktop */}
+        {/* The skyline shows through here on phones; on desktop the indicators sit bottom right. */}
         <div
-          className="rise-in relative z-0 -mt-12 min-h-[19rem] flex-1 sm:min-h-[28rem] lg:absolute lg:inset-y-0 lg:right-0 lg:mt-0 lg:w-[58%] lg:flex-none"
+          className="rise-in relative z-0 min-h-[17rem] flex-1 sm:min-h-[24rem] lg:absolute lg:inset-y-0 lg:right-0 lg:w-[58%] lg:flex-none"
           style={delay(240)}
         >
-          {/*
-            The mask fades the photo's top edge (phones) or left edge (desktop) into the page.
-            The shading overlays live INSIDE the masked wrapper, so they fade out with it and
-            never leave a hard edge against the page's blue glow.
-          */}
-          <div className="hero-photo-mask absolute inset-0">
-            <Image
-              src="/images/climatecheck-coast.jpg"
-              alt="Sunset over the water at a Massachusetts coastal neighborhood, with shingled homes among the trees"
-              fill
-              priority
-              sizes="(min-width: 1024px) 58vw, 100vw"
-              className="object-cover object-[50%_50%] lg:object-[45%_58%]"
-            />
-            {/* soft top edge under the header (desktop) */}
-            <div
-              aria-hidden="true"
-              className="absolute inset-x-0 top-0 hidden h-24 bg-gradient-to-b from-navy-950/60 to-transparent lg:block"
-            />
-            {/* darken the bottom so the value indicators read cleanly */}
-            <div
-              aria-hidden="true"
-              className="absolute inset-x-0 bottom-0 h-1/2 bg-gradient-to-t from-navy-950 via-navy-950/55 to-transparent lg:h-2/5"
-            />
-          </div>
-
           <ul className="absolute inset-x-0 bottom-0 mx-auto grid max-w-md grid-cols-3 gap-2 px-5 pb-6 pt-14 lg:inset-x-auto lg:bottom-0 lg:right-8 lg:mx-0 lg:w-[28rem] lg:px-0 lg:pb-10">
             {VALUES.map((v) => (
               <li key={v.label} className="flex flex-col items-center gap-2.5 text-center">

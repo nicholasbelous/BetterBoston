@@ -108,6 +108,31 @@ body {
   color: var(--color-ink-dim) !important;
 }
 
+/* Landing skyline: a slow pan and zoom, plus a breathing mint glow. */
+@keyframes hero-drift {
+  from {
+    transform: scale(1.06) translate3d(-1.2%, 0.6%, 0);
+  }
+  to {
+    transform: scale(1.14) translate3d(1.2%, -0.6%, 0);
+  }
+}
+.hero-drift {
+  animation: hero-drift 28s ease-in-out infinite alternate;
+  will-change: transform;
+}
+@keyframes hero-glow {
+  from {
+    opacity: 0.55;
+  }
+  to {
+    opacity: 1;
+  }
+}
+.hero-glow {
+  animation: hero-glow 6s ease-in-out infinite alternate;
+}
+
 /* Gentle entrance for screen content. Disabled for reduced-motion users. */
 @keyframes rise-in {
   from {
@@ -124,7 +149,9 @@ body {
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .rise-in {
+  .rise-in,
+  .hero-drift,
+  .hero-glow {
     animation: none;
   }
   * {
