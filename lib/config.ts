@@ -21,6 +21,8 @@ export const config = {
   allowUnverifiedPrograms: optional("ALLOW_UNVERIFIED_PROGRAMS") === "true",
   /** Folder with demo_grid.geojson + demo_grid.meta.json, relative to the project root */
   scoresDir: optional("SCORES_DIR") ?? "data/scores",
+  /** Set LIVE_DATA_ENABLED=false to turn off every live API call (e.g. offline demo) */
+  liveDataEnabled: optional("LIVE_DATA_ENABLED") !== "false",
   googleSolarApiKey: optional("GOOGLE_SOLAR_API_KEY"),
 } as const;
 
