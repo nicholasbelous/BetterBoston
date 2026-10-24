@@ -2,24 +2,24 @@
 // Screen 3: home analysis for one address.
 // Header (back, share, save), the real aerial photo of the block (any Massachusetts
 // address, even outside the scored area), tabs (Overview / Climate Risks /
-// Recommendations), risk summary, and a link on to the improvements screen.
+// Recommendations = the real action plan with a rent/own choice), and the risk summary.
 import Link from "next/link";
 import { useState } from "react";
 import CoverageNotice from "@/components/CoverageNotice";
 import DataSourceNote from "@/components/DataSourceNote";
 import AerialPhoto, { inMassachusettsBox } from "@/components/report/AerialPhoto";
 import LiveConditions from "@/components/report/LiveConditions";
+import ReportPlan from "@/components/report/ReportPlan";
 import { coverTone, levelFromScore, riskTone, TONE_TEXT } from "@/components/report/levels";
 import RiskTile from "@/components/report/RiskTile";
 import SampleDataBanner from "@/components/SampleDataBanner";
 import ScoreCard from "@/components/ScoreCard";
-import { btnGhost, btnPrimary, card, eyebrowPill, iconBtn } from "@/components/ui/classes";
+import { btnPrimary, card, eyebrowPill, iconBtn } from "@/components/ui/classes";
 import Icon from "@/components/ui/Icon";
 import Tabs, { type TabItem } from "@/components/ui/Tabs";
 import { useReport } from "@/hooks/useReport";
 import { useStoredString } from "@/hooks/useStoredString";
 import type { ScoreCell, ScoreMetadata } from "@/lib/types";
-import { MOCK_ACTIONS } from "@/mocks/actions.mock";
 import type { ReportData } from "@/services/climateClient";
 import { splitAddress, withLocation, type LocationContext } from "@/services/locationContext";
 
@@ -270,34 +270,28 @@ export default function ReportScreen({ initial }: { initial: LocationContext }) 
                 aria-labelledby="report-tab-recs"
                 className="rise-in flex flex-col gap-3"
               >
-                <h2 className="font-display text-lg font-semibold">Where to start</h2>
-                <ul className="flex flex-col gap-2.5">
-                  {MOCK_ACTIONS.slice(0, 3).map((a) => (
-                    <li key={a.id} className={`${card} flex items-center gap-3.5 p-3.5`}>
-                      <span className="grid size-10 shrink-0 place-items-center rounded-xl bg-mint-tint text-mint">
-                        <Icon name={a.icon} size={20} />
-                      </span>
-                      <div className="min-w-0">
-                        <p className="text-[15px] font-semibold">{a.title}</p>
-                        <p className="text-sm text-ink-dim">{a.summary}</p>
-                      </div>
-                    </li>
-                  ))}
-                </ul>
-                <p className="text-xs text-ink-mute">
-                  Placeholder ideas, not verified Massachusetts programs. See all actions for the full list.
-                </p>
-                <Link href={withLocation("/actions", here)} className={`${btnGhost} self-start`}>
-                  See all recommended actions
-                  <Icon name="arrowRight" size={16} />
-                </Link>
+                <h2 className="font-display text-lg font-semibold">Your action plan</h2>
+                {data.cell ? (
+                  <ReportPlan cellId={data.cell.cell_id} />
+                ) : (
+                  <p className={`${card} p-4 text-sm text-ink-dim`}>Not enough clear data for this block yet.</p>
+                )}
               </div>
             ) : null}
 
-            <Link href={withLocation("/improvements", here)} className={`${btnPrimary} w-full lg:w-auto lg:self-start`}>
-              See how improvements could help
-              <Icon name="arrowRight" size={18} />
-            </Link>
+            {tab !== "recs" ? (
+              <button
+                type="button"
+                onClick={() => {
+                  setTab("recs");
+                  window.scrollTo({ top: 0, behavior: "smooth" });
+                }}
+                className={`${btnPrimary} w-full lg:w-auto lg:self-start`}
+              >
+                See your action plan
+                <Icon name="arrowRight" size={18} />
+              </button>
+            ) : null}
           </div>
         )}
       </div>

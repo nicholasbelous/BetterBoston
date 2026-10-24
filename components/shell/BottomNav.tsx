@@ -16,7 +16,7 @@ export default function BottomNav() {
       aria-label="Screens"
       className="fixed inset-x-0 bottom-0 z-40 border-t border-line bg-navy-950/90 pb-[env(safe-area-inset-bottom)] backdrop-blur-xl md:hidden"
     >
-      <ul className="mx-auto grid max-w-md grid-cols-5">
+      <ul className="mx-auto grid max-w-md grid-cols-3">
         {NAV_ITEMS.map((item) => {
           const active = isActive(pathname, item.href);
           return (

@@ -23,18 +23,7 @@ const FEATURES: Feature[] = [
     body: "A plain-English climate report for one address.",
     href: "/report",
   },
-  {
-    icon: "compare",
-    title: "Before & After",
-    body: "Drag to see how shade, roofs and plants could change your home.",
-    href: "/improvements",
-  },
-  {
-    icon: "bulb",
-    title: "Personalized Actions",
-    body: "Clear next steps for homeowners and renters.",
-    href: "/actions",
-  },
+
   {
     icon: "chart",
     title: "Real Data Insights",
