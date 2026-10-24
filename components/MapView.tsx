@@ -9,6 +9,7 @@
 
 import type { ExpressionSpecification, Map as MapLibreMap, GeoJSONSource } from "maplibre-gl";
 import { useEffect, useRef, useState } from "react";
+import { loadMaplibre } from "@/components/map/loadMaplibre";
 import type { ScoreCell, ScoreGrid } from "@/lib/types";
 
 export type MapMetric = "heat" | "tree";
@@ -92,7 +93,8 @@ export default function MapView({
 
     (async () => {
       // maplibre-gl 6 has named exports only (no default export).
-      const maplibregl = await import("maplibre-gl");
+      // loadMaplibre also points MapLibre at its worker file (see components/map/loadMaplibre.ts).
+      const maplibregl = await loadMaplibre();
       const el = containerRef.current;
       if (cancelled || !el) return;
 
@@ -275,5 +277,11 @@ export default function MapView({
     );
   }
 
-  return <div ref={containerRef} className={`bg-navy-900 ${className}`} role="region" aria-label={ariaLabel} />;
+  return (
+    <div className={`bg-navy-900 ${className}`} role="region" aria-label={ariaLabel}>
+      {/* MapLibre's CSS forces position: relative on its container, which beats Tailwind's
+          layered "absolute inset-0" and left the map 0 px tall. So MapLibre gets an inner div. */}
+      <div ref={containerRef} className="h-full w-full" />
+    </div>
+  );
 }

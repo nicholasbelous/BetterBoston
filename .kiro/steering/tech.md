@@ -3,7 +3,7 @@
 ## Stack
 
 - **Web app:** Next.js 16 (App Router) + React 19 + TypeScript + Tailwind CSS 4. This Next.js version differs from older docs. Check `node_modules/next/dist/docs/` before using an unfamiliar API.
-- **Map:** MapLibre GL (`maplibre-gl`), loaded with a dynamic import inside `useEffect` in a client component.
+- **Map:** MapLibre GL (`maplibre-gl`), loaded inside `useEffect` in a client component with `loadMaplibre()` from `components/map/loadMaplibre.ts`. Never call `import("maplibre-gl")` directly: under Turbopack, MapLibre's own worker lookup picks the wrong file and the map draws nothing. Also give MapLibre an inner `h-full w-full` div as its container: its CSS sets `position: relative` on the container, which overrides Tailwind's `absolute inset-0`.
 - **Basemap:** MassGIS 2025 aerial imagery tile service (ArcGIS Online), URL from `NEXT_PUBLIC_BASEMAP_TILE_URL`.
 - **AI:** Claude through the Anthropic API (`@anthropic-ai/sdk`). Key in `ANTHROPIC_API_KEY`, model in `CLAUDE_MODEL` (default `claude-haiku-5-5`).
 - **Validation:** zod 4.

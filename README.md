@@ -96,7 +96,8 @@ Owns `app/` pages (not `app/api/`), `components/`, `hooks/`, `services/`, `mocks
 - [ ] **"Dangerous heat"** in `mocks/actions.mock.ts`: change it to "very hot days."
 
 **Connect to real data**
-- [ ] **Aerial photo on the report.** The report shows a drawn house. The spec calls for the MassGIS 2025 photo of the home and block. Add a small, non-interactive `MapView` at about zoom 18, with a caption: "Aerial photo, spring 2025 (MassGIS)." Keep the drawing only as decoration.
+- [x] **Aerial photo on the report.** Done (Person 3): `components/report/AerialPhoto.tsx` puts the MassGIS 2025 photo at the top of the report, with the pin, the score cell outline, a Block / Close-up toggle, and the source and dates. It works for **any Massachusetts address**, even outside the scored area (the scores still say "Coverage coming soon"). Outside Massachusetts no photo is shown. `HouseVisual` is no longer used on the report.
+- [x] **Map drew nothing.** Fixed (Person 3): Turbopack pointed MapLibre at the wrong worker file, and MapLibre's CSS overrode `absolute inset-0` on the map container (0 px tall). `/map` now shows the photo and grid. Load MapLibre with `loadMaplibre()` (`components/map/loadMaplibre.ts`) and give it an inner container div.
 - [ ] **Report → Recommendations tab.** Use the same `loadActionPlan` result as `/actions` instead of `MOCK_ACTIONS.slice(0, 3)`.
 - [ ] **Live data cards.** One call to `GET /api/live?lat&lng` returns everything. The full contract, fields, and required labels are in "Live data contract" under Person 3.
   - [ ] Weather card: today's high and "feels like" from `weather` in `/api/live`, labeled **"Air temperature today (National Weather Service)"** so it's never confused with the ground-temperature score.

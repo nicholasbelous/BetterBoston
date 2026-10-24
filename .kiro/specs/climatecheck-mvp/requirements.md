@@ -29,6 +29,7 @@ A mobile-first web app that gives Massachusetts renters and homeowners a plain-E
 1. The report SHALL show a map with the MassGIS 2025 aerial imagery basemap, from `NEXT_PUBLIC_BASEMAP_TILE_URL`.
 2. The map SHALL mark the address and outline the score cell.
 3. The map SHALL credit the imagery source.
+4. The aerial photo SHALL show for any Massachusetts address, including addresses outside the scored area. WHEN the photo service has no tile for the address (outside Massachusetts), THEN the report SHALL show no photo frame.
 
 ### Requirement 3: Heat score
 

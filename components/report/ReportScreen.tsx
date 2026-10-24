@@ -1,12 +1,13 @@
 "use client";
 // Screen 3: home analysis for one address.
-// Header (back, share, save), house picture with hotspots, tabs (Overview / Climate Risks /
+// Header (back, share, save), the real aerial photo of the block (any Massachusetts
+// address, even outside the scored area), tabs (Overview / Climate Risks /
 // Recommendations), risk summary, and a link on to the improvements screen.
 import Link from "next/link";
 import { useState } from "react";
 import CoverageNotice from "@/components/CoverageNotice";
 import DataSourceNote from "@/components/DataSourceNote";
-import HouseVisual from "@/components/report/HouseVisual";
+import AerialPhoto, { inMassachusettsBox } from "@/components/report/AerialPhoto";
 import { coverTone, levelFromScore, riskTone, TONE_TEXT } from "@/components/report/levels";
 import RiskTile from "@/components/report/RiskTile";
 import SampleDataBanner from "@/components/SampleDataBanner";
@@ -63,19 +64,17 @@ function heatDetail(cell: ScoreCell, metadata: ScoreMetadata): string {
   return parts.join(" ");
 }
 
+// The aerial photo has its own loading state, so this only covers the scores column.
 function Skeleton() {
   return (
-    <div className="grid gap-5 lg:grid-cols-2" role="status" aria-label="Loading your report">
-      <div className="aspect-[4/3] animate-pulse rounded-3xl bg-navy-800" />
-      <div className="flex flex-col gap-3">
-        <div className="h-10 animate-pulse rounded-xl bg-navy-800" />
-        <div className="grid grid-cols-2 gap-3">
-          {[0, 1, 2, 3].map((i) => (
-            <div key={i} className="h-[4.5rem] animate-pulse rounded-2xl bg-navy-800" />
-          ))}
-        </div>
-        <div className="h-28 animate-pulse rounded-2xl bg-navy-800" />
+    <div className="flex flex-col gap-3" role="status" aria-label="Loading your report">
+      <div className="h-10 animate-pulse rounded-xl bg-navy-800" />
+      <div className="grid grid-cols-2 gap-3">
+        {[0, 1, 2, 3].map((i) => (
+          <div key={i} className="h-[4.5rem] animate-pulse rounded-2xl bg-navy-800" />
+        ))}
       </div>
+      <div className="h-28 animate-pulse rounded-2xl bg-navy-800" />
     </div>
   );
 }
@@ -135,6 +134,8 @@ export default function ReportScreen({ initial }: { initial: LocationContext }) 
 
   const covered = data?.status === "ok" && data.cell !== null;
   const heatLevel = levelFromScore(data?.cell?.heat_score);
+  // The photo shows right away and gets the score cell outline once the scores load.
+  const showPhoto = inMassachusettsBox(initial.lat, initial.lng);
 
   return (
     <div className="mx-auto w-full max-w-6xl px-5 pb-6 pt-4">
@@ -164,7 +165,7 @@ export default function ReportScreen({ initial }: { initial: LocationContext }) 
       <div className="mb-4">
         <SampleDataBanner
           show={data?.isSample ?? true}
-          note="Flood risk and air quality are placeholders. The house picture is an illustration."
+          note="Flood risk and air quality are placeholders. The aerial photo is real."
         />
       </div>
 
@@ -177,18 +178,26 @@ export default function ReportScreen({ initial }: { initial: LocationContext }) 
         </div>
       ) : null}
 
-      {data === null ? (
-        <Skeleton />
-      ) : data.status === "out_of_coverage" ? (
-        <div className="max-w-xl">
-          <CoverageNotice neighborhoods={data.metadata.area.neighborhoods} />
-        </div>
-      ) : (
-        <div className="grid gap-6 lg:grid-cols-[1.1fr_1fr] lg:items-start lg:gap-10">
+      <div className={showPhoto ? "grid gap-6 lg:grid-cols-[1.1fr_1fr] lg:items-start lg:gap-10" : ""}>
+        {showPhoto ? (
           <div className="lg:sticky lg:top-24">
-            <HouseVisual />
+            <AerialPhoto
+              lat={initial.lat}
+              lng={initial.lng}
+              geometry={data?.geometry ?? null}
+              cellSizeM={data?.metadata.grid.cell_size_m ?? null}
+              place={title}
+            />
           </div>
+        ) : null}
 
+        {data === null ? (
+          <Skeleton />
+        ) : data.status === "out_of_coverage" ? (
+          <div className="max-w-xl">
+            <CoverageNotice neighborhoods={data.metadata.area.neighborhoods} />
+          </div>
+        ) : (
           <div className="flex flex-col gap-5">
             <div>
               <Tabs tabs={TABS} value={tab} onChange={setTab} ariaLabel="Report sections" idPrefix="report" />
@@ -281,8 +290,8 @@ export default function ReportScreen({ initial }: { initial: LocationContext }) 
               <Icon name="arrowRight" size={18} />
             </Link>
           </div>
-        </div>
-      )}
+        )}
+      </div>
     </div>
   );
 }
