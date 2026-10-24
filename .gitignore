@@ -1,32 +1,62 @@
-# OS files
-.DS_Store
-Thumbs.db
+# ---------- Node / Next.js ----------
+/node_modules
+/.pnp
+.pnp.*
+.yarn/*
+!.yarn/patches
+!.yarn/plugins
+!.yarn/releases
+!.yarn/versions
+/coverage
+/.next/
+/out/
+/build
+*.tsbuildinfo
+next-env.d.ts
+.vercel
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.pnpm-debug.log*
 
-# Logs
-*.log
-logs/
+# ---------- Env / secrets ----------
+.env
+.env.*
+!.env.example
+*.pem
 
-# Dependencies
-node_modules/
-vendor/
+# ---------- Python ----------
 __pycache__/
 *.py[cod]
 .venv/
 venv/
-env/
+.ipynb_checkpoints/
+.pytest_cache/
 
-# Build output
-dist/
-build/
-out/
-target/
+# ---------- Raw imagery and large rasters (never commit) ----------
+pipeline/raw/*
+!pipeline/raw/.gitkeep
+pipeline/work/*
+!pipeline/work/.gitkeep
+*.tif
+*.tiff
+*.TIF
+*.jp2
+*.j2w
+*.aux.xml
+*.zip
+*.tar
+*.tar.gz
+*.img
+*.vrt
+*.nc
 
-# Environment & secrets
-.env
-.env.*
-*.local
+# Only the small processed outputs in data/scores/ are committed.
 
-# Editor / IDE
-.vscode/
+# ---------- OS / editors ----------
+.DS_Store
+Thumbs.db
 .idea/
 *.swp
+.vscode/*
+!.vscode/extensions.json
