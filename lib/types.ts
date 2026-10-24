@@ -117,7 +117,8 @@ export type ProgramCategory =
   | "cooling_center"
   | "tree_request"
   | "rebate"
-  | "community_solar";
+  | "community_solar"
+  | "rooftop_solar";
 
 export type ProgramTopic = "heat" | "trees" | "energy" | "solar";
 
@@ -162,6 +163,9 @@ export interface ActionPlan {
   actions: ActionItem[]; // 3-5 items
   tenure: Tenure;
   cell_id: string;
+  /** "ai" = written by Claude from the program list; "rules" = built-in fallback (no key, or AI output failed checks) */
+  source: "ai" | "rules";
+  /** Claude model id, or "rules" */
   model_id: string;
   generated_at: string;
   /** true when the scores behind this plan are SAMPLE data */

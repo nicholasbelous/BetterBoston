@@ -1,0 +1,16 @@
+{
+  "version": "v1",
+  "hooks": [
+    {
+      "name": "Validate new score data",
+      "trigger": "PostFileCreate",
+      "description": "When a new file appears in data/scores/, check the GeoJSON schema and that SAMPLE data is never flagged as real.",
+      "matcher": "data/scores/.*\\.(geojson|json)$",
+      "action": {
+        "type": "command",
+        "command": "if [ -f pipeline/validate_scores.py ]; then npm run --silent validate:data; else echo \"pipeline/validate_scores.py not written yet (Person 2), skipping score validation\"; fi",
+        "timeout": 60
+      }
+    }
+  ]
+}

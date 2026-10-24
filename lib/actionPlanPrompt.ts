@@ -1,35 +1,72 @@
 // Builds the system + user prompt for the action plan.
-// Full prompt text and rules: .kiro/specs/climatecheck-mvp/design.md
-// ("Action plan prompt").
+// Design notes: .kiro/specs/climatecheck-mvp/design.md ("Action plan prompt").
 import "server-only";
 import type { Program, ScoreCell, ScoreMetadata, Tenure } from "@/lib/types";
 
-/**
- * TODO (task 4.2): system prompt must say, at minimum:
- * - Use ONLY the programs in the provided JSON. Cite each by its exact `id`.
- * - Never invent programs, phone numbers, dollar amounts, dates, or eligibility rules.
- *   If a detail is not in the program JSON, leave it out.
- * - Scores are relative comparisons, not official assessments.
- * - Heat is ground surface temperature on one summer day, not air temperature.
- * - Plain English, 8th-grade reading level, short sentences.
- * - Return 3-5 actions via the submit_action_plan tool.
- */
+export const ACTION_PLAN_TOOL_NAME = "submit_action_plan";
+export const ACTION_PLAN_TOOL_DESCRIPTION =
+  "Submit the personalized action plan: a short summary plus 3 to 5 actions, each citing one program id.";
+
 export function buildSystemPrompt(): string {
-  return "TODO: system prompt (task 4.2)";
+  return `You write short, practical climate action plans for people who live in Massachusetts.
+
+Follow every rule:
+1. Recommend ONLY programs listed in <programs>. Cite each one by its exact "id". Use each program at most once.
+2. Never invent programs, phone numbers, emails, websites, dollar amounts, dates, deadlines, or eligibility rules. Only mention a detail if it appears in that program's JSON. If you are not sure, leave the detail out.
+3. The scores compare this block with other blocks in the same area. They are not official assessments. Do not call a block "dangerous" or "safe".
+4. The heat numbers are the ground surface temperature measured by satellite on one summer day (the date is in <scores>). They are not the air temperature. Say "the ground" or "streets and rooftops", never "the air".
+5. Green cover comes from spring aerial photos taken before most trees had leaves, so it can undercount trees. Call it "green cover", not "tree canopy".
+6. If a score is null, say there was not enough clear data for that part. Do not guess.
+7. Write at an 8th-grade reading level. Use short sentences and everyday words. Speak to the reader as "you".
+8. "summary": 2 or 3 sentences about what the numbers mean for this block.
+9. Return 3 to 5 actions, most useful first. "title" is a short action that starts with a verb. "why" is 1 or 2 sentences that connect the program to this block's numbers.
+10. Answer only by calling the ${ACTION_PLAN_TOOL_NAME} tool.`;
 }
 
-/**
- * TODO (task 4.2): user message with three JSON blocks:
- * <scores>{cell scores + reference area + scene date}</scores>
- * <tenure>renter|owner</tenure>
- * <programs>[...only programs already filtered by tenure...]</programs>
- */
+/** Only the fields the model needs. Links are not sent; the server adds them from the program record. */
+function programForPrompt(p: Program) {
+  return {
+    id: p.id,
+    name: p.name,
+    description: p.description,
+    topics: p.topics,
+    ...(p.details ? { details: p.details } : {}),
+  };
+}
+
 export function buildUserPrompt(args: {
   cell: ScoreCell;
   metadata: ScoreMetadata;
   tenure: Tenure;
   programs: Program[];
 }): string {
-  void args;
-  return "TODO: user prompt (task 4.2)";
+  const { cell, metadata, tenure, programs } = args;
+  const scores = {
+    neighborhood: cell.neighborhood,
+    heat: {
+      mean_ground_surface_temp_f: cell.mean_surface_temp_f,
+      difference_from_average_f: cell.temp_diff_f,
+      heat_score_0_to_100: cell.heat_score,
+      higher_score_means: "hotter ground than most other blocks",
+      compared_with: metadata.heat.reference_area,
+      satellite_date: metadata.heat.scene_date,
+    },
+    green_cover: {
+      percent_of_block_green: cell.pct_vegetated,
+      tree_score_0_to_100: cell.tree_score,
+      higher_score_means: "greener than most other blocks",
+      compared_with: metadata.tree.reference_area,
+      photo_dates: metadata.tree.imagery_dates,
+    },
+  };
+
+  return `<scores>
+${JSON.stringify(scores, null, 2)}
+</scores>
+
+<tenure>${tenure}</tenure>
+
+<programs>
+${JSON.stringify(programs.map(programForPrompt), null, 2)}
+</programs>`;
 }

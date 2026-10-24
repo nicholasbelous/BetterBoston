@@ -1,0 +1,19 @@
+{
+  "category": "rooftop_solar",
+  "programs": [
+    {
+      "id": "ma-smart-rooftop-solar",
+      "category": "rooftop_solar",
+      "name": "SMART 3.0 solar incentive (rooftop solar)",
+      "description": "If you put solar panels on your home, the state's SMART 3.0 program pays you for the solar power your panels make. Payments come from your electric utility (National Grid, Eversource, or Unitil) for up to 20 years, as checks or bill credits. Your solar contractor applies for you. Towns served by a municipal light plant are not eligible.",
+      "link": "https://www.masscec.com/blog/unlocking-solar-incentives-your-guide-massachusetts-smart-30-program",
+      "audience": ["owner"],
+      "topics": ["solar", "energy"],
+      "last_verified": null,
+      "details": {
+        "rate_2026": "$0.03 per kWh base rate; $0.06 per kWh for low-income qualified customers (2026 program year, may change in later years)",
+        "how_to_apply": "Tell your solar contractor you want to participate"
+      }
+    }
+  ]
+}
