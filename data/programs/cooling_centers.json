@@ -9,7 +9,7 @@
       "link": "https://www.boston.gov/departments/emergency-management/keeping-cool-heat",
       "audience": ["renter", "owner"],
       "topics": ["heat"],
-      "last_verified": null,
+      "last_verified": "2026-10-24",
       "details": {
         "where": "BCYF community centers",
         "when": "During periods of extreme heat, during regular operating hours",
@@ -24,7 +24,7 @@
       "link": "https://www.boston.gov/departments/emergency-management/city-boston-alerts-and-notifications",
       "audience": ["renter", "owner"],
       "topics": ["heat"],
-      "last_verified": null,
+      "last_verified": "2026-10-24",
       "details": {
         "how": "Sign up on the City of Boston AlertBoston page",
         "languages": "11 of Boston's most-spoken languages"

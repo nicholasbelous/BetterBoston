@@ -7,6 +7,9 @@ app/                     Next.js App Router (Person 1 owns pages; Person 3 owns 
   about/page.tsx         Data sources, methods, limitations
   api/geocode/route.ts   GET  ?q=        -> LocationResult
   api/score/route.ts     GET  ?lat&lng   -> ScoreLookupResponse
+  api/grid/route.ts      GET             -> GridResponse (all cells, for map colors)
+  api/live/route.ts      GET  ?lat&lng   -> LiveBundle (every live source)
+  api/live/[source]/route.ts GET ?lat&lng -> LiveResult for one source
   api/action-plan/route.ts POST {cell_id, tenure} -> ActionPlan
 components/              UI components (Person 1)
 lib/                     Server logic + shared types (Person 3; score types owned by Person 2)
@@ -19,9 +22,13 @@ lib/                     Server logic + shared types (Person 3; score types owne
   actionPlanPrompt.ts    System + user prompt
   actionPlanSchema.ts    Validates model output, rejects invented facts
   actionPlanRules.ts     Rule-based fallback plan
+  live/                  Live data sources (one file each) + http/cache helpers + registry (index.ts)
+    context.ts           Live facts for the action plan prompt
 data/
   scores/                Pipeline output (Person 2 only): demo_grid.geojson + demo_grid.meta.json
   programs/              Curated program JSON (Person 3). The ONLY programs the AI may cite
+  live/                  Prebuilt live context (climate_boston.json from npm run build:climate)
+scripts/                 Node helper scripts (check-programs, build-climate-context)
 pipeline/                Python data pipeline (Person 2)
   raw/                   Downloaded imagery (gitignored)
   work/                  Intermediate rasters (gitignored)
@@ -44,4 +51,4 @@ Initial-Kiro-Design/     Old FastAPI + Vite prototype. Reference only; excluded 
 |---|---|
 | 1 Frontend | `app/` pages, `components/`, `app/globals.css`, `public/` |
 | 2 Pipeline | `pipeline/`, `data/scores/`, score types in `lib/types.ts` |
-| 3 Backend + AI | `app/api/`, `lib/`, `data/programs/`, `.env.example`, `.kiro/` |
+| 3 Backend + AI | `app/api/`, `lib/`, `data/programs/`, `data/live/`, `scripts/`, `.env.example`, `.kiro/` |

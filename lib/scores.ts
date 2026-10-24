@@ -7,6 +7,7 @@ import { readFile, stat } from "node:fs/promises";
 import path from "node:path";
 import { config } from "@/lib/config";
 import type {
+  GridResponse,
   ScoreCellFeature,
   ScoreGrid,
   ScoreLookupResponse,
@@ -104,4 +105,45 @@ export async function getCellById(
   const { byId, metadata } = await loadScores();
   const feature = byId.get(cellId);
   return feature ? { feature, metadata } : null;
+}
+
+let gridCache: { mtimeMs: number; value: GridResponse } | null = null;
+
+/** Trimmed grid for coloring the map (GET /api/grid). Rebuilt only when the score files change. */
+export async function getGrid(): Promise<GridResponse> {
+  const loaded = await loadScores();
+  if (gridCache && gridCache.mtimeMs === loaded.mtimeMs) return gridCache.value;
+
+  const { grid, metadata } = loaded;
+  const value: GridResponse = {
+    type: "FeatureCollection",
+    features: grid.features.map((f) => ({
+      type: "Feature",
+      geometry: f.geometry,
+      properties: {
+        cell_id: f.properties.cell_id,
+        neighborhood: f.properties.neighborhood,
+        heat_score: f.properties.heat_score,
+        tree_score: f.properties.tree_score,
+        temp_diff_f: f.properties.temp_diff_f,
+        pct_vegetated: f.properties.pct_vegetated,
+        is_sample: f.properties.is_sample,
+      },
+    })),
+    metadata: {
+      is_sample: metadata.is_sample,
+      generated_at: metadata.generated_at,
+      area: metadata.area,
+      heat: metadata.heat,
+      tree: metadata.tree,
+    },
+  };
+  gridCache = { mtimeMs: loaded.mtimeMs, value };
+  return value;
+}
+
+/** Center of a cell's bounding box, used to fetch live data for a cell. */
+export function cellCenter(feature: ScoreCellFeature): { lat: number; lng: number } {
+  const [minX, minY, maxX, maxY] = feature.properties.bbox;
+  return { lat: (minY + maxY) / 2, lng: (minX + maxX) / 2 };
 }

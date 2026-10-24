@@ -212,3 +212,71 @@ A cool-roof program was planned for owners, but no official Massachusetts or Bos
 | Score missing for a cell | "Not enough clear data for this block" |
 | Claude down / bad output | Rules plan, same layout, without the "written by AI" label |
 | Score files missing | 503 "Score data isn't loaded yet." |
+
+## `GET /api/grid`
+
+Every score cell, for coloring the map with real data.
+
+| Status | Body |
+|---|---|
+| 200 | `GridResponse { type: "FeatureCollection", features: [{ geometry, properties: { cell_id, neighborhood, heat_score, tree_score, temp_diff_f, pct_vegetated, is_sample } }], metadata: { is_sample, generated_at, area, heat, tree } }` |
+| 503 | Score files missing |
+
+About 330 KB for 944 cells. Rebuilt only when the score files change.
+
+## Live data
+
+Public APIs called server-side, cached in memory, merged into one response. Code is in `lib/live/`, with the rules in `.kiro/steering/data.md`.
+
+### `GET /api/live?lat=<num>&lng=<num>`
+
+200 `LiveBundle`:
+
+```ts
+{
+  lat, lng, fetched_at,
+  weather: LiveResult<LiveWeather>,
+  air:     LiveResult<LiveAir>,
+  flood:   LiveResult<LiveFlood>,
+  trees:   LiveResult<LiveTrees>,
+  places:  LiveResult<LivePlaces>,
+  area:    LiveResult<LiveArea>,
+  climate: LiveResult<LiveClimate>,
+}
+
+type LiveResult<T> =
+  | { ok: true; data: T; sources: { name: string; url: string }[]; fetched_at: string; note?: string }
+  | { ok: false; error: "outside_coverage" | "unavailable" | "disabled"; message: string };
+```
+
+- **400** for bad coordinates.
+- Points outside Massachusetts get `outside_coverage` for every source.
+- Boston-only sources (`trees`, `places`, `climate`, the sea-level-rise part of `flood`, and the census tract in `area`) are `outside_coverage` elsewhere in Massachusetts.
+- Each source has its own timeout (20 s). A slow or failed source never blocks the others.
+- Typical response time: about 1-2 s cold, under 50 ms cached.
+
+### `GET /api/live/<source>?lat&lng`
+
+Same `LiveResult` for one source: `weather | air | flood | trees | places | area | climate`. Unknown source → 404.
+
+### Source details
+
+| Source | Upstream calls | Key fields |
+|---|---|---|
+| weather | NWS `/points` → `/forecast`, `/stations` → `/observations/latest`, `/alerts/active?point=`; Open-Meteo `/v1/forecast` | `observed.temperature_f`, `forecast[]`, `daily[]` (7 days), `hot_days_next_7`, `alerts[]`, `heat_alert`, `air_quality_alert` |
+| air | Open-Meteo `/v1/air-quality` | `us_aqi`, `category`, `main_pollutant`, `max_aqi_next_24h`, `modeled: true` |
+| flood | FEMA NFHL layer 28; Climate Ready Boston SLR layers 0-8 | `fema_zone`, `fema_high_risk`, `future[]` (9/21/36 in × high tide / 10% / 1% storm), `first_flooded_at_in` |
+| trees | BPRD Trees FeatureServer, 100 m radius | `tree_count`, `empty_planting_sites`, `top_species`, `size_mix` |
+| places | Community Centers, Community Center Pools, BPL branches (5 km search) | nearest 3 of each with `distance_mi` |
+| area | BPDA neighborhoods (layer 5); Climate Ready Boston Social Vulnerability | `neighborhood`, `in_boston`, `tract.pct_*` |
+| climate | `data/live/climate_boston.json` (built by `npm run build:climate`) | `last_summer`, `baseline_days_90f_per_year`, `projection` |
+
+### Live data in the action plan
+
+- `POST /api/action-plan` looks up the cell's center, then calls `getLiveFacts` with a 5 s timeout. Sources that don't answer in time are skipped.
+- The facts go into `<live_conditions>` in the user prompt and into the validator's allowed-fact corpus.
+- The rules fallback uses them too:
+  - an active heat alert puts cooling centers and AlertBoston first and leads the summary
+  - empty planting sites push the street tree request up
+  - the nearest community center is named in the cooling center action
+- `ActionPlan.live_sources_used` lists the sources that contributed. The plan cache key includes a signature of the live facts that change the plan (heat alert, AQI category, empty sites, nearest center).

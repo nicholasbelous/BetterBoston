@@ -2,20 +2,133 @@
 /* MapLibre's own styles (controls, attribution). */
 @import "maplibre-gl/dist/maplibre-gl.css";
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
+/*
+  ClimateCheck MA design tokens (dark navy + mint/teal).
+  Use as Tailwind classes: bg-navy-900, text-ink-dim, border-line, bg-mint, ...
+*/
+@theme {
+  --color-navy-950: #060f16;
+  --color-navy-900: #0a1720;
+  --color-navy-800: #0e2230;
+  --color-navy-700: #143040;
+  --color-navy-600: #1c4155;
+
+  --color-line: rgb(255 255 255 / 0.09);
+  --color-line-strong: rgb(255 255 255 / 0.18);
+
+  --color-ink: #eaf3f6;
+  --color-ink-dim: #a3b8c4;
+  --color-ink-mute: #7a909e;
+
+  --color-mint: #3ee6b4;
+  --color-mint-600: #22c79b;
+  --color-mint-tint: rgb(62 230 180 / 0.12);
+
+  --color-heat: #f2763d;
+  --color-amber: #f3b941;
+  --color-leaf: #45d48b;
+  --color-alert: #ef5b4a;
+  --color-water: #4fb4ff;
+
+  --font-sans: "Inter", "Segoe UI Variable Text", "Segoe UI", system-ui, -apple-system, Roboto,
+    "Helvetica Neue", Arial, sans-serif;
+  --font-display: "Inter Tight", "Segoe UI Variable Display", "Segoe UI", system-ui, -apple-system,
+    Roboto, "Helvetica Neue", Arial, sans-serif;
 }
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
+:root {
+  color-scheme: dark;
+}
+
+html {
+  background: var(--color-navy-950);
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif;
+  min-height: 100dvh;
+  color: var(--color-ink);
+  font-family: var(--font-sans);
+  background:
+    radial-gradient(1200px 600px at 85% -10%, rgb(34 199 155 / 0.1), transparent 60%),
+    radial-gradient(900px 500px at -10% 30%, rgb(79 180 255 / 0.07), transparent 60%),
+    var(--color-navy-950);
+  background-attachment: fixed;
 }
 
-/* TODO (task 6): pick a small color palette for heat (warm) and tree (green) score cards. */
+::selection {
+  background: rgb(62 230 180 / 0.35);
+}
+
+/* Keyboard focus ring that works on dark surfaces. */
+:focus-visible {
+  outline: 2px solid var(--color-mint);
+  outline-offset: 2px;
+}
+
+/*
+  Landing hero photo: fade its edge into the real page background (including the blue glow)
+  with a mask, so there is no visible seam. Phones fade the top, desktop fades the left.
+*/
+.hero-photo-mask {
+  /* Eased (smoothstep-like) ramp so the fade has no visible start or end line. */
+  --hero-fade: transparent 0%, rgb(0 0 0 / 0.03) 4%, rgb(0 0 0 / 0.1) 9%, rgb(0 0 0 / 0.24) 15%,
+    rgb(0 0 0 / 0.43) 21%, rgb(0 0 0 / 0.66) 27%, rgb(0 0 0 / 0.86) 33%, rgb(0 0 0 / 0.96) 38%, #000 44%;
+  -webkit-mask-image: linear-gradient(to bottom, var(--hero-fade));
+  mask-image: linear-gradient(to bottom, var(--hero-fade));
+}
+@media (min-width: 64rem) {
+  .hero-photo-mask {
+    --hero-fade: transparent 0%, rgb(0 0 0 / 0.03) 6%, rgb(0 0 0 / 0.1) 13%, rgb(0 0 0 / 0.24) 21%,
+      rgb(0 0 0 / 0.43) 30%, rgb(0 0 0 / 0.66) 39%, rgb(0 0 0 / 0.86) 48%, rgb(0 0 0 / 0.96) 56%, #000 64%;
+    -webkit-mask-image: linear-gradient(to right, var(--hero-fade));
+    mask-image: linear-gradient(to right, var(--hero-fade));
+  }
+}
+
+/* Heat gradient used by the legend and the map ramp (low risk -> high risk). */
+.heat-gradient {
+  background: linear-gradient(
+    90deg,
+    #2fbf71 0%,
+    #a8d24a 28%,
+    #f3b941 50%,
+    #f2763d 75%,
+    #e0402f 100%
+  );
+}
+.tree-gradient {
+  background: linear-gradient(90deg, #1b3b2c 0%, #2b7a4b 45%, #45d48b 75%, #b7f5cf 100%);
+}
+
+/* Map controls: dark glass look. */
+.maplibregl-ctrl-attrib {
+  background: rgb(6 15 22 / 0.7) !important;
+}
+.maplibregl-ctrl-attrib a {
+  color: var(--color-ink-dim) !important;
+}
+
+/* Gentle entrance for screen content. Disabled for reduced-motion users. */
+@keyframes rise-in {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+.rise-in {
+  animation: rise-in 0.45s ease-out both;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .rise-in {
+    animation: none;
+  }
+  * {
+    scroll-behavior: auto !important;
+    transition-duration: 0.01ms !important;
+  }
+}

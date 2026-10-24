@@ -11,6 +11,7 @@ const eslintConfig = defineConfig([
     "build/**",
     "next-env.d.ts",
     "pipeline/**",
+    // Earlier Vite prototype, kept for reference only. Not part of the Next.js app.
     "Initial-Kiro-Design/**",
   ]),
 ]);

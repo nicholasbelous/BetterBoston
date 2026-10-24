@@ -10,7 +10,7 @@ A mobile-first web app that turns satellite and aerial imagery into a plain-Engl
 ## What the app does
 
 1. The user types an address or taps "use my location."
-2. The app shows the MassGIS 2025 aerial photo of the home and block.
+2. The app shows the MassGIS 2025 aerial photo of the home and block. The photo works for any Massachusetts address, even outside the scored area, where the scores still say "coverage coming soon." It was taken from a plane: call it an "aerial photo," never a "satellite image."
 3. Score cards:
    - **Heat**: how hot the block's ground surface got on one hot summer day, compared with the Boston average (Landsat thermal data).
    - **Green cover**: how green the block is (NDVI from the infrared band of the MassGIS 2025 aerial photos).
