@@ -2,25 +2,18 @@
 // Bottom sheet (phone) / side card (desktop) under the map: the selected place,
 // its two scores, a link to the full report, the layer filter and the legend.
 import Link from "next/link";
-import HouseScene from "@/components/art/HouseScene";
 import type { MapMetric } from "@/components/MapView";
 import MapLegend from "@/components/map/MapLegend";
 import { coverTone, levelFromScore, riskTone, TONE_TILE } from "@/components/report/levels";
 import FilterChips, { type ChipOption } from "@/components/ui/FilterChips";
 import Icon from "@/components/ui/Icon";
 import { btnPrimary } from "@/components/ui/classes";
-import type { ImprovementId } from "@/mocks/improvements.mock";
 import type { ReportData } from "@/services/climateClient";
 
-type LayerId = MapMetric | "flood";
-
-const LAYERS: ChipOption<LayerId>[] = [
+const LAYERS: ChipOption<MapMetric>[] = [
   { id: "heat", label: "Heat", icon: "thermometer" },
   { id: "tree", label: "Green", icon: "tree" },
-  { id: "flood", label: "Flood", icon: "water", disabled: true, hint: "flood details are in the report" },
 ];
-
-const NO_PLANTS: ReadonlySet<ImprovementId> = new Set();
 
 interface MapSheetProps {
   title: string;
@@ -52,9 +45,6 @@ export default function MapSheet({ title, sub, report, metric, onMetric, reportH
       <div className="mx-auto h-1 w-10 rounded-full bg-line-strong md:hidden" aria-hidden="true" />
 
       <div className="flex items-center gap-3">
-        <div className="size-14 shrink-0 overflow-hidden rounded-xl border border-line">
-          <HouseScene improvements={NO_PLANTS} label="" className="size-full" />
-        </div>
         <div className="min-w-0 flex-1">
           <h2 className="truncate font-display text-lg font-semibold leading-tight">{title}</h2>
           {sub ? <p className="truncate text-sm text-ink-dim">{sub}</p> : null}
@@ -89,14 +79,7 @@ export default function MapSheet({ title, sub, report, metric, onMetric, reportH
         </>
       )}
 
-      <FilterChips<LayerId>
-        ariaLabel="Map layer"
-        options={LAYERS}
-        value={metric}
-        onChange={(id) => {
-          if (id !== "flood") onMetric(id);
-        }}
-      />
+      <FilterChips<MapMetric> ariaLabel="Map layer" options={LAYERS} value={metric} onChange={onMetric} />
       <MapLegend metric={metric} />
     </section>
   );

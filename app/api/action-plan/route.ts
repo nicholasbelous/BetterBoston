@@ -24,7 +24,7 @@ import type { ActionPlan, ApiError, Program } from "@/lib/types";
 
 const requestSchema = z.object({
   cell_id: z.string().min(1).max(100),
-  tenure: z.enum(["renter", "owner"]),
+  tenure: z.enum(["renter", "owner", "everyone"]),
 });
 
 // Same cell + tenure + data -> same plan. Saves API credits and makes the toggle instant.
@@ -43,7 +43,7 @@ export async function POST(request: Request) {
   }
   const parsed = requestSchema.safeParse(body);
   if (!parsed.success) {
-    return error(400, "bad_request", "Body must be { cell_id: string, tenure: 'renter' | 'owner' }");
+    return error(400, "bad_request", "Body must be { cell_id: string, tenure: 'renter' | 'owner' | 'everyone' }");
   }
   const { cell_id, tenure } = parsed.data;
 
@@ -51,7 +51,8 @@ export async function POST(request: Request) {
   let programs: Program[];
   try {
     found = await getCellById(cell_id);
-    programs = filterByTenure(await loadPrograms(), tenure);
+    const all = await loadPrograms();
+    programs = tenure === "everyone" ? all : filterByTenure(all, tenure);
   } catch (err) {
     console.error("action-plan data load failed", err);
     return error(503, "data_unavailable", "Score or program data isn't loaded yet.");

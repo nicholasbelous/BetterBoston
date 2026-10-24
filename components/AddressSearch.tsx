@@ -1,23 +1,17 @@
 "use client";
-// Address input + "Use my location" + demo address chips.
+// Address input.
 // Address -> geocodeAddress() (GET /api/geocode, demo fallback) -> router.push(/map?lat&lng&q)
-// Location -> navigator.geolocation.getCurrentPosition -> same push, q="My location"
 //
 // Visual layout follows the landing mock-up: one large input with a pin icon and a mint
-// arrow button, then a single quiet row of quick-start chips.
+// arrow button.
 
 import { useRouter } from "next/navigation";
 import { useId, useState } from "react";
 import Icon from "@/components/ui/Icon";
-import { DEMO_ADDRESSES } from "@/mocks/demoAddresses.mock";
-import { AddressError, demoToLocation, geocodeAddress, type ResolvedLocation } from "@/services/climateClient";
-import { getDevicePosition, LocationError } from "@/services/geolocate";
+import { AddressError, geocodeAddress, type ResolvedLocation } from "@/services/climateClient";
 import { withLocation } from "@/services/locationContext";
 
-type Busy = null | "search" | "locate";
-
-const chip =
-  "inline-flex min-h-11 shrink-0 items-center gap-2 whitespace-nowrap rounded-full border border-line bg-navy-900/70 px-3.5 text-[13px] font-medium text-ink-dim backdrop-blur transition duration-200 hover:border-mint/40 hover:text-ink focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-mint disabled:cursor-not-allowed disabled:opacity-60";
+type Busy = null | "search";
 
 export default function AddressSearch() {
   const router = useRouter();
@@ -40,19 +34,6 @@ export default function AddressSearch() {
       go(await geocodeAddress(query));
     } catch (err) {
       setError(err instanceof AddressError ? err.message : "Something went wrong. Please try again.");
-      setBusy(null);
-    }
-  }
-
-  async function onUseMyLocation() {
-    if (busy) return;
-    setError(null);
-    setBusy("locate");
-    try {
-      const pos = await getDevicePosition();
-      go({ ...pos, label: "My location", origin: "device" });
-    } catch (err) {
-      setError(err instanceof LocationError ? err.message : "We couldn't get your location.");
       setBusy(null);
     }
   }
@@ -103,36 +84,9 @@ export default function AddressSearch() {
         ) : null}
       </form>
 
-      {/* Quick start: one quiet row. Scrolls sideways on phones, wraps on large screens. */}
-      <div className="-mx-5 lg:mx-0">
-        <ul
-          aria-label="Quick start"
-          className="flex gap-2 overflow-x-auto px-5 pb-1 [scrollbar-width:none] lg:flex-wrap lg:overflow-visible lg:px-0 [&::-webkit-scrollbar]:hidden"
-        >
-          <li className="shrink-0">
-            <button type="button" onClick={onUseMyLocation} disabled={busy !== null} className={chip}>
-              <Icon name="locate" size={16} className="text-mint" />
-              {busy === "locate" ? "Finding you…" : "Use my location"}
-            </button>
-          </li>
-          {DEMO_ADDRESSES.map((a) => (
-            <li key={a.id} className="shrink-0">
-              <button
-                type="button"
-                onClick={() => go(demoToLocation(a))}
-                aria-label={`Try demo address ${a.label}, ${a.neighborhood}`}
-                className={chip}
-              >
-                {a.label}
-                <span className="hidden text-ink-mute xl:inline">{a.neighborhood}</span>
-              </button>
-            </li>
-          ))}
-        </ul>
-        <p className="mt-1.5 px-5 text-[11px] leading-snug text-ink-dim [text-shadow:0_1px_6px_rgb(6_15_22/0.95)] lg:px-0">
-          Heat and green cover scores for neighborhoods across the City of Boston.
-        </p>
-      </div>
+      <p className="px-1 text-[11px] leading-snug text-ink-dim [text-shadow:0_1px_6px_rgb(6_15_22/0.95)] lg:px-0">
+        Heat and green cover scores for neighborhoods across the City of Boston.
+      </p>
     </div>
   );
 }

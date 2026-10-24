@@ -10,14 +10,14 @@ On the same summer day, some Boston blocks get far hotter than others. On June 2
 
 ## What it does
 
-1. **Search an address** or tap "Use my location."
+1. **Search an address.**
 2. **See your block from above:** the real MassGIS 2025 aerial photo, for any address in Massachusetts, with your home pinned and the scored area outlined.
 3. **Read your scores:**
    - **Ground heat:** how hot streets and rooftops got on June 25, 2024, compared with all of Boston (Landsat 9 thermal band).
    - **Green cover:** how much of the block is green (NDVI from the same Landsat image).
    - Each score shows its source and date, and says it's a comparison, not an official assessment.
 4. **Right now near you:** live National Weather Service weather and heat alerts, modeled air quality, FEMA flood zone and future flooding with sea level rise, City street trees, and the nearest community centers and libraries for cooling off.
-5. **Get an action plan:** choose "I rent" or "I own." The plan uses only programs a person checked on their official pages (cooling centers, AlertBoston, street tree requests, Mass Save, community solar, heat pumps, SMART rooftop solar).
+5. **Get an action plan:** one plan for renters and owners alike, which says when a program is only for homeowners. The plan uses only programs a person checked on their official pages (cooling centers, AlertBoston, street tree requests, Mass Save, community solar, heat pumps, SMART rooftop solar).
 6. **Climate map:** every scored block colored by heat or green cover, on top of the aerial photo.
 
 Scores cover the **City of Boston**: 11,780 blocks (100 m cells) in 24 neighborhoods, from Brighton to Hyde Park. West Roxbury and the Harbor Islands are not scored (`EXCLUDED_NEIGHBORHOODS` in `pipeline/config.py`). Anywhere else, the report still shows the aerial photo and live conditions, and says "Coverage coming soon" in place of scores. It never shows an estimated score.
@@ -31,7 +31,7 @@ Scores cover the **City of Boston**: 11,780 blocks (100 m cells) in 24 neighborh
 | Beacon Hill (72 Beacon St) | 43 | about the same | 39 |
 | Jamaica Plain (Perkins St) | 8 | about 15°F cooler | 78 |
 
-Use the demo buttons on the home page.
+Type one of these into the search box on the home page.
 
 ## How it works
 
@@ -109,6 +109,14 @@ Rebuild the scores from the Landsat scene: see [`pipeline/README.md`](pipeline/R
 | `LIVE_DATA_ENABLED` | No | `false` turns off every live call, for an offline demo |
 | `SCORES_DIR` | Testing only | Points the app at a different score grid |
 | `ALLOW_UNVERIFIED_PROGRAMS` | Development only | Shows programs nobody has checked yet |
+
+### Deploy on Vercel
+
+1. On [vercel.com/new](https://vercel.com/new), import this GitHub repo. Vercel detects Next.js; keep the default build settings.
+2. Optional: under **Environment Variables**, add `ANTHROPIC_API_KEY` (and `GEOCODER_USER_AGENT` with a contact address). Nothing else is required.
+3. Deploy. Every push to `main` redeploys.
+
+The score grid and program list in `data/` are read from disk by the API routes and ship with the build (`outputFileTracingIncludes` in `next.config.ts`).
 
 ## How we used Kiro
 

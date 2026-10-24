@@ -2,7 +2,7 @@
 // Design notes: .kiro/specs/climatecheck-mvp/design.md ("Action plan prompt").
 import "server-only";
 import type { LiveFacts } from "@/lib/live/context";
-import type { Program, ScoreCell, ScoreMetadata, Tenure } from "@/lib/types";
+import type { PlanAudience, Program, ScoreCell, ScoreMetadata } from "@/lib/types";
 
 export const ACTION_PLAN_TOOL_NAME = "submit_action_plan";
 export const ACTION_PLAN_TOOL_DESCRIPTION =
@@ -48,7 +48,7 @@ export function liveFactsForPrompt(live: LiveFacts | null): Omit<LiveFacts, "sou
 export function buildUserPrompt(args: {
   cell: ScoreCell;
   metadata: ScoreMetadata;
-  tenure: Tenure;
+  tenure: PlanAudience;
   programs: Program[];
   live?: LiveFacts | null;
 }): string {
@@ -78,7 +78,7 @@ export function buildUserPrompt(args: {
 ${JSON.stringify(scores, null, 2)}
 </scores>
 
-<tenure>${tenure}</tenure>
+<tenure>${tenure === "everyone" ? "not asked (could be a renter or an owner; say when a program is only for owners)" : tenure}</tenure>
 
 <live_conditions>
 ${liveBlock ? JSON.stringify(liveBlock, null, 2) : "none available"}

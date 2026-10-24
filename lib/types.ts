@@ -8,6 +8,8 @@
 export type BBox = [number, number, number, number];
 
 export type Tenure = "renter" | "owner";
+/** Who an action plan is written for. "everyone" = no rent/own question asked. */
+export type PlanAudience = Tenure | "everyone";
 
 // ---------- Scores (data/scores/) ----------
 
@@ -161,7 +163,7 @@ export interface ActionItem {
 export interface ActionPlan {
   summary: string;
   actions: ActionItem[]; // 3-5 items
-  tenure: Tenure;
+  tenure: PlanAudience;
   cell_id: string;
   /** "ai" = written by Claude from the program list; "rules" = built-in fallback (no key, or AI output failed checks) */
   source: "ai" | "rules";
@@ -176,7 +178,7 @@ export interface ActionPlan {
 
 export interface ActionPlanRequest {
   cell_id: string;
-  tenure: Tenure;
+  tenure: PlanAudience;
 }
 
 export interface ApiError {

@@ -11,12 +11,12 @@ import type {
   GridResponse,
   LiveBundle,
   LocationResult,
+  PlanAudience,
   ScoreCell,
   ScoreCellFeature,
   ScoreGrid,
   ScoreLookupResponse,
   ScoreMetadata,
-  Tenure,
 } from "@/lib/types";
 import { DEMO_ADDRESSES, type DemoAddress } from "@/mocks/demoAddresses.mock";
 import { findMockCell, MOCK_GRID, MOCK_METADATA } from "@/mocks/climate.mock";
@@ -209,7 +209,7 @@ export async function loadLive(lat: number, lng: number): Promise<LiveBundle | n
 
 export type ActionPlanOutcome = { origin: "api"; plan: ActionPlan } | { origin: "mock" };
 
-export async function loadActionPlan(cellId: string, tenure: Tenure): Promise<ActionPlanOutcome> {
+export async function loadActionPlan(cellId: string, tenure: PlanAudience): Promise<ActionPlanOutcome> {
   const res = await fetchWithTimeout(
     "/api/action-plan",
     {

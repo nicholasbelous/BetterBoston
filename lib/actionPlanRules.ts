@@ -3,7 +3,7 @@
 // Uses only the block's scores, live facts from public APIs, and the program
 // records. No invented facts.
 import type { LiveFacts } from "@/lib/live/context";
-import type { Program, ScoreCell, ScoreMetadata, Tenure } from "@/lib/types";
+import type { PlanAudience, Program, ScoreCell, ScoreMetadata } from "@/lib/types";
 
 export const HEAT_HIGH_SCORE = 60;
 export const TREE_LOW_SCORE = 40;
@@ -11,7 +11,7 @@ export const TREE_LOW_SCORE = 40;
 const MAX_ACTIONS = 5;
 
 /** Program ids in priority order for each situation. Ids missing from the allowed list are skipped. */
-function priorityOrder(cell: ScoreCell, tenure: Tenure, live: LiveFacts | null): string[] {
+function priorityOrder(cell: ScoreCell, tenure: PlanAudience, live: LiveFacts | null): string[] {
   // An active NWS heat alert makes heat actions urgent, whatever the block's score.
   const hot = (cell.heat_score ?? 0) >= HEAT_HIGH_SCORE || live?.weather?.heat_alert === true;
   const lowGreen =
@@ -21,11 +21,11 @@ function priorityOrder(cell: ScoreCell, tenure: Tenure, live: LiveFacts | null):
   const heat = ["boston-cooling-centers", "boston-alertboston"];
   const trees = ["boston-street-tree-request"];
   const energy =
-    tenure === "owner"
+    tenure !== "renter"
       ? ["mass-save-heat-pumps", "mass-save-home-energy-assessment", "mass-save-income-eligible"]
       : ["mass-save-home-energy-assessment", "mass-save-income-eligible"];
   const solar =
-    tenure === "owner" ? ["ma-smart-rooftop-solar", "ma-community-solar"] : ["ma-community-solar"];
+    tenure !== "renter" ? ["ma-smart-rooftop-solar", "ma-community-solar"] : ["ma-community-solar"];
 
   const order: string[] = [];
   if (hot) order.push(...heat);
@@ -156,7 +156,7 @@ function titleFor(program: Program): string {
 export function buildRulesPlan(args: {
   cell: ScoreCell;
   metadata: ScoreMetadata;
-  tenure: Tenure;
+  tenure: PlanAudience;
   programs: Program[];
   live?: LiveFacts | null;
 }): { summary: string; actions: { title: string; why: string; program_id: string }[] } {
@@ -183,7 +183,9 @@ export function buildRulesPlan(args: {
   const advice =
     tenure === "renter"
       ? "As a renter, these programs can help you stay cool and save energy."
-      : "As an owner, these programs can help you cool your home and save energy.";
+      : tenure === "owner"
+        ? "As an owner, these programs can help you cool your home and save energy."
+        : "These programs can help you stay cool and save energy. Some are only for homeowners.";
 
   const alert = heatAlertPhrase(live);
 
