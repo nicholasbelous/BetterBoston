@@ -5,7 +5,15 @@ Run from the repo root:
     python3 pipeline/build_grid.py
 
 Pure helpers come first and do no file or network I/O, so tests can call them
-on plain numpy arrays. Importing this module runs nothing.
+on plain numpy arrays. Importing this module runs nothing; rasterio, geopandas,
+and pyproj are imported only inside the I/O functions.
+
+I/O (Requirements 7.9, 7.10, 11): ``main`` checks every exit condition in the
+order 1.8 -> 10.9 -> 7.10 -> 7.9 -> 8.8 -> 9.11 before writing anything, then
+writes Work_Grid/Work_Meta, runs the Validator, and publishes to
+``data/scores/`` only when it passes. Paths come from ``config`` and are
+resolved against ``config.REPO_ROOT`` at call time, so tests can monkeypatch
+``config.REPO_ROOT`` (and ``config.BOSTON_BBOX``) to use a temporary layout.
 
 Pixel pipeline (Requirement 7):
 - ``classify_pixels`` marks Valid_Heat_Pixels and Valid_Tree_Pixels.
@@ -20,19 +28,47 @@ from __future__ import annotations
 import datetime as _dt
 import json
 import math
+import os
 import re
+import shutil
+import subprocess
+import sys
 from dataclasses import dataclass
+from pathlib import Path
 from typing import TYPE_CHECKING
 
 import numpy as np
 
-from config import CELL_SIZE_M, DEMO_BBOXES, MIN_VALID_FRAC, SCENE_FILE
-from scoring import percentile_rank, qa_mask
+import config
+from config import (
+    ASSET_KEYS,
+    BAND_PATHS,
+    BOSTON_GEOJSON,
+    CELL_SIZE_M,
+    DEMO_BBOXES,
+    MIN_VALID_FRAC,
+    NDVI_THRESHOLD,
+    OUTPUT_CRS,
+    PROCESSING_CRS,
+    SCENE_FILE,
+    SCORES_GRID,
+    SCORES_META,
+    VALIDATOR,
+    WORK_GRID,
+    WORK_META,
+    abs_path,
+    ensure_work_dir,
+    require_boston_bbox,
+)
+from scoring import dn_to_fahrenheit, dn_to_reflectance, ndvi, percentile_rank, qa_mask
 
 if TYPE_CHECKING:  # type hints only; keeps import light
     from collections.abc import Callable, Sequence
 
+    import geopandas
     from affine import Affine
+
+    from raster_io import Band
 
     # (x, y) in EPSG:26919 -> (lng, lat) in EPSG:4326, e.g. a pyproj
     # ``Transformer.from_crs(..., always_xy=True).transform``.
@@ -525,3 +561,448 @@ def build_feature(cell: DemoCell, props: dict) -> dict:
 def build_grid_obj(features) -> dict:
     """GeoJSON ``FeatureCollection`` with only ``type`` and ``features`` (9.9)."""
     return {"type": "FeatureCollection", "features": list(features)}
+
+
+# ---- metadata and serialization (Requirement 10) ----------------------------
+
+GENERATED_BY = "pipeline/build_grid.py"
+AREA_NAME = "Boston demo areas"
+REFERENCE_AREA = "City of Boston"
+HEAT_SOURCE = (
+    "Landsat 8/9 Collection 2 Level-2 surface temperature "
+    "(USGS, via Microsoft Planetary Computer)"
+)
+TREE_SOURCE = "Landsat 8/9 Collection 2 Level-2 surface reflectance, NDVI (same scene)"
+# Citation pages for the metadata, in the order required by 10.7.
+SOURCES = (
+    (
+        "Microsoft Planetary Computer: Landsat Collection 2 Level-2",
+        "https://planetarycomputer.microsoft.com/dataset/landsat-c2-l2",
+    ),
+    (
+        "USGS Landsat Collection 2",
+        "https://www.usgs.gov/landsat-missions/landsat-collection-2",
+    ),
+    (
+        "U.S. Census Bureau Cartographic Boundary Files",
+        "https://www.census.gov/geographies/mapping-files/time-series/geo/"
+        "cartographic-boundary.html",
+    ),
+)
+
+
+def _demo_union_bbox(demo_bboxes: "DemoBboxes" = DEMO_BBOXES) -> list[float]:
+    """``[minLng, minLat, maxLng, maxLat]`` covering every Demo_Bbox (10.3)."""
+    boxes = [b for _, b in demo_bboxes]
+    return [
+        float(min(b[0] for b in boxes)),
+        float(min(b[1] for b in boxes)),
+        float(max(b[2] for b in boxes)),
+        float(max(b[3] for b in boxes)),
+    ]
+
+
+def build_metadata(
+    scene: SceneInfo, reference_mean_f: float, cell_count: int, generated_at: str
+) -> dict:
+    """``ScoreMetadata`` dict with keys in ``lib/types.ts`` order (10.1–10.8).
+
+    ``generated_at`` is passed in (``YYYY-MM-DDTHH:MM:SSZ``, UTC) so tests can
+    fix it. ``reference_mean_f`` must be finite; it is rounded to 0.1.
+    """
+    ref = round(_finite(reference_mean_f, "reference_mean_f"), 1)
+    return {
+        "schema_version": 1,
+        "is_sample": False,
+        "generated_at": generated_at,
+        "generated_by": GENERATED_BY,
+        "area": {
+            "name": AREA_NAME,
+            "neighborhoods": [name for name, _ in DEMO_BBOXES],
+            "bbox": _demo_union_bbox(),
+        },
+        "grid": {
+            "cell_size_m": CELL_SIZE_M,
+            "processing_crs": PROCESSING_CRS,
+            "output_crs": OUTPUT_CRS,
+            "cell_count": int(cell_count),
+        },
+        "heat": {
+            "source": HEAT_SOURCE,
+            "scene_id": scene.id,
+            "scene_date": scene.date,
+            "reference_area": REFERENCE_AREA,
+            "reference_mean_f": ref,
+            "min_valid_frac": MIN_VALID_FRAC,
+        },
+        "tree": {
+            "source": TREE_SOURCE,
+            "imagery_dates": scene.date,
+            "ndvi_threshold": NDVI_THRESHOLD,
+            "leaf_off": False,
+            "reference_area": REFERENCE_AREA,
+            "min_valid_frac": MIN_VALID_FRAC,
+        },
+        "sources": [{"name": name, "url": url} for name, url in SOURCES],
+        "notes": [
+            "Surface temperature, not air temperature",
+            f"Single summer day: {scene.date}",
+            "Landsat thermal native resolution is 100 m (delivered at 30 m)",
+            "30 m pixels mix trees and pavement",
+            "Scores are percentile ranks across all City of Boston cells",
+        ],
+    }
+
+
+def dumps_grid(grid: dict) -> str:
+    """Compact UTF-8 JSON plus one newline, as in ``make_sample_data.py`` (9.9).
+
+    ``allow_nan=False`` makes a stray NaN/Infinity fail loudly (9.6); for
+    finite data the text is identical to the sample-data format.
+    """
+    return json.dumps(grid, ensure_ascii=False, separators=(",", ":"), allow_nan=False) + "\n"
+
+
+def dumps_meta(meta: dict) -> str:
+    """2-space indented JSON, non-ASCII unescaped, plus one newline (10.10)."""
+    return json.dumps(meta, ensure_ascii=False, indent=2, allow_nan=False) + "\n"
+
+
+def build_outputs(
+    stats: CellStats, scene: SceneInfo, generated_at: str, to_4326: "To4326"
+) -> tuple[dict, dict]:
+    """Score all Boston_Cells, select demo cells, and build ``(grid, meta)``.
+
+    Pure composition of ``score_cells``, ``select_demo_cells``,
+    ``cell_properties``, ``build_feature``, ``build_grid_obj``, and
+    ``build_metadata``. Raises ``EmptyReferenceSet`` or ``EmptyDemoAreas``.
+    """
+    scored = score_cells(stats)
+    cells = select_demo_cells(scored, to_4326=to_4326)
+    features = [build_feature(c, cell_properties(c, scored)) for c in cells]
+    grid = build_grid_obj(features)
+    meta = build_metadata(scene, scored.reference_mean_f, len(features), generated_at)
+    return grid, meta
+
+
+# ---- I/O --------------------------------------------------------------------
+
+
+class InputError(Exception):
+    """One or more input files are missing or unreadable (Requirement 7.10).
+
+    ``problems`` holds one message per bad file, each starting with its
+    repo-relative path.
+    """
+
+    def __init__(self, problems) -> None:
+        self.problems = list(problems)
+        super().__init__(
+            "missing or unreadable input file(s):\n  " + "\n  ".join(self.problems)
+        )
+
+
+class PublishError(Exception):
+    """Copying the work files into ``data/scores/`` failed (Requirement 11.8).
+
+    ``filename`` names the file that failed to copy.
+    """
+
+    def __init__(self, filename: str, reason: str) -> None:
+        self.filename = filename
+        self.reason = reason
+        super().__init__(f"cannot publish {filename}: {reason}")
+
+
+def _read_work_band(path: Path) -> "Band":
+    """Read band 1 of a saved work GeoTIFF in full (already windowed by the Fetcher)."""
+    import rasterio
+
+    from raster_io import Band
+
+    with rasterio.open(path) as src:
+        if src.crs is None:
+            raise ValueError("raster has no CRS")
+        data = src.read(1)
+        nodata = src.nodata
+        return Band(
+            data=data,
+            crs=src.crs,
+            transform=src.transform,
+            dtype=str(src.dtypes[0]),
+            nodata=None if nodata is None else float(nodata),
+        )
+
+
+def load_inputs() -> tuple[dict[str, "Band"], "geopandas.GeoDataFrame"]:
+    """Open the four band GeoTIFFs and ``boston.geojson`` (Requirement 7.10).
+
+    Every file is checked before raising, so ``InputError`` lists each missing
+    or unreadable path, not just the first. Nothing is written.
+    """
+    from raster_io import load_boundary
+
+    problems: list[str] = []
+    bands: dict[str, Band] = {}
+    for key in ASSET_KEYS:
+        rel = BAND_PATHS[key]
+        path = abs_path(rel)
+        if not path.is_file():
+            problems.append(f"{rel}: does not exist")
+            continue
+        try:
+            bands[key] = _read_work_band(path)
+        except Exception as exc:  # noqa: BLE001 - rasterio/GDAL open or read errors
+            problems.append(f"{rel}: cannot be opened ({exc})")
+
+    boundary = None
+    path = abs_path(BOSTON_GEOJSON)
+    if not path.is_file():
+        problems.append(f"{BOSTON_GEOJSON}: does not exist")
+    else:
+        try:
+            boundary = load_boundary(path)
+            if len(boundary) == 0:
+                raise ValueError("contains no features")
+        except Exception as exc:  # noqa: BLE001 - unreadable or empty GeoJSON
+            boundary = None
+            problems.append(f"{BOSTON_GEOJSON}: cannot be opened ({exc})")
+
+    if problems:
+        raise InputError(problems)
+    return bands, boundary
+
+
+def compute_cell_stats(bands: dict[str, "Band"], boundary) -> CellStats:
+    """Per-cell aggregates for every Boston_Cell from aligned bands (Requirements 7.1–7.8).
+
+    The inside-Boston mask uses pixel centers (``all_touched=False``). Pixel
+    centers inside Boston are transformed from the raster CRS to
+    ``PROCESSING_CRS`` with a vectorized pyproj transformer and binned into
+    ``CELL_SIZE_M`` cells; no pixel values are resampled.
+    """
+    from pyproj import Transformer
+
+    from raster_io import inside_mask
+
+    qa = bands["qa_pixel"]
+    inside = inside_mask(boundary, qa.crs, qa.transform, qa.data.shape)
+    heat_valid, tree_valid = classify_pixels(
+        inside,
+        bands["lwir11"].data,
+        bands["red"].data,
+        bands["nir08"].data,
+        qa.data,
+    )
+
+    temp_f = dn_to_fahrenheit(bands["lwir11"].data[inside])
+    ndvi_vals = ndvi(
+        dn_to_reflectance(bands["red"].data[inside]),
+        dn_to_reflectance(bands["nir08"].data[inside]),
+    )
+
+    x, y = pixel_centers(qa.transform, qa.data.shape)
+    to_proc = Transformer.from_crs(qa.crs, PROCESSING_CRS, always_xy=True)
+    easting, northing = to_proc.transform(x[inside], y[inside])
+    cell_e, cell_n = assign_cells(easting, northing, CELL_SIZE_M)
+
+    return aggregate(
+        cell_e,
+        cell_n,
+        heat_valid[inside],
+        tree_valid[inside],
+        temp_f,
+        ndvi_vals,
+        NDVI_THRESHOLD,
+    )
+
+
+def run_validator(grid: Path, meta: Path) -> subprocess.CompletedProcess:
+    """Run the Validator on ``grid`` and ``meta`` from the repo root (Requirement 11.2).
+
+    ``grid`` and ``meta`` are repo-relative paths. The command is
+    ``<python> pipeline/validate_scores.py --grid <grid> --meta <meta>`` with
+    ``cwd=REPO_ROOT``, using the interpreter running this script. Standard
+    output and standard error are captured as text.
+    """
+    cmd = [
+        sys.executable,
+        Path(VALIDATOR).as_posix(),
+        "--grid",
+        Path(grid).as_posix(),
+        "--meta",
+        Path(meta).as_posix(),
+    ]
+    return subprocess.run(
+        cmd,
+        cwd=config.REPO_ROOT,
+        capture_output=True,
+        text=True,
+        check=False,
+    )
+
+
+def _remove_quietly(path: Path) -> None:
+    try:
+        path.unlink()
+    except FileNotFoundError:
+        pass
+
+
+def publish(work_grid: Path, work_meta: Path, dest_grid: Path, dest_meta: Path) -> None:
+    """Copy both work files into place so ``data/scores/`` never mixes runs (11.3, 11.7, 11.8).
+
+    Both files are first copied to ``<dest>.tmp`` next to their targets; only
+    after both copies succeed is each moved into place with ``os.replace``.
+    If a copy fails, both temp files are removed, the targets are left
+    unchanged, and ``PublishError`` names the file that failed.
+    """
+    work_grid, work_meta = Path(work_grid), Path(work_meta)
+    dest_grid, dest_meta = Path(dest_grid), Path(dest_meta)
+    tmp_grid = dest_grid.with_name(dest_grid.name + ".tmp")
+    tmp_meta = dest_meta.with_name(dest_meta.name + ".tmp")
+    temps = (tmp_grid, tmp_meta)
+
+    for src, dest, tmp in ((work_grid, dest_grid, tmp_grid), (work_meta, dest_meta, tmp_meta)):
+        try:
+            dest.parent.mkdir(parents=True, exist_ok=True)
+            shutil.copyfile(src, tmp)
+        except OSError as exc:
+            for t in temps:
+                _remove_quietly(t)
+            raise PublishError(dest.name, f"copy from {src} to {tmp} failed: {exc}") from exc
+
+    for dest, tmp in ((dest_grid, tmp_grid), (dest_meta, tmp_meta)):
+        try:
+            os.replace(tmp, dest)
+        except OSError as exc:
+            for t in temps:
+                _remove_quietly(t)
+            raise PublishError(dest.name, f"move from {tmp} failed: {exc}") from exc
+
+
+def _utc_now() -> str:
+    """Current UTC time as ``YYYY-MM-DDTHH:MM:SSZ`` (Requirement 10.2)."""
+    return _dt.datetime.now(_dt.timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
+
+
+def _read_scene() -> SceneInfo:
+    """Read and parse the Scene_File; a missing or unreadable file is a ``SceneError``."""
+    path = abs_path(SCENE_FILE)
+    try:
+        text = path.read_text(encoding="utf-8")
+    except FileNotFoundError as exc:
+        raise SceneError(None, "missing (run `python3 pipeline/fetch_landsat.py`)") from exc
+    except (OSError, UnicodeDecodeError) as exc:
+        raise SceneError(None, f"cannot be read ({exc})") from exc
+    return parse_scene(text)
+
+
+def _summary_counts(grid: dict) -> tuple[list[tuple[str, int]], int, int]:
+    """Per-neighborhood cell counts (config order) and null heat/tree score counts."""
+    props = [f["properties"] for f in grid["features"]]
+    per_area = [
+        (name, sum(1 for p in props if p["neighborhood"] == name)) for name, _ in DEMO_BBOXES
+    ]
+    null_heat = sum(1 for p in props if p["heat_score"] is None)
+    null_tree = sum(1 for p in props if p["tree_score"] is None)
+    return per_area, null_heat, null_tree
+
+
+def _err(message: str) -> None:
+    print(f"error: {message}", file=sys.stderr)
+
+
+def main() -> int:
+    # 1.8: the Boston boundary must exist before anything else.
+    try:
+        require_boston_bbox()
+    except SystemExit as exc:
+        return exc.code if isinstance(exc.code, int) and exc.code != 0 else 1
+
+    try:
+        # 10.9: Scene_File.
+        scene = _read_scene()
+        print(f"Scene: {scene.id} ({scene.date})")
+
+        # 7.10: every input file exists and opens.
+        bands, boundary = load_inputs()
+
+        # 7.9: bands share CRS, shape, and transform.
+        from raster_io import check_alignment
+
+        mismatches = check_alignment({k: bands[k] for k in ASSET_KEYS})
+        if mismatches:
+            _err("input bands are not aligned:\n  " + "\n  ".join(mismatches))
+            return 1
+
+        # 7.1-7.8: pixels -> Boston cells.
+        stats = compute_cell_stats(bands, boundary)
+        print(f"Boston cells: {len(stats)}")
+
+        # 8.8, 9.11: score all Boston cells, then select demo cells.
+        from pyproj import Transformer
+
+        to_4326 = Transformer.from_crs(PROCESSING_CRS, OUTPUT_CRS, always_xy=True).transform
+        grid, meta = build_outputs(stats, scene, _utc_now(), to_4326)
+        grid_text = dumps_grid(grid)
+        meta_text = dumps_meta(meta)
+    except (SceneError, InputError, EmptyReferenceSet, EmptyDemoAreas) as exc:
+        _err(str(exc))
+        return 1
+
+    # 11.1: candidate files in pipeline/work/ (1.9: create the directory).
+    from raster_io import write_json_atomic
+
+    try:
+        ensure_work_dir()
+        write_json_atomic(abs_path(WORK_GRID), grid_text)
+        write_json_atomic(abs_path(WORK_META), meta_text)
+    except OSError as exc:
+        _err(f"cannot write {WORK_GRID} / {WORK_META}: {exc}")
+        return 1
+    print(f"Wrote {WORK_GRID} and {WORK_META} ({len(grid['features'])} cells)")
+
+    # 11.2, 11.4: validate before touching data/scores/.
+    try:
+        result = run_validator(WORK_GRID, WORK_META)
+    except OSError as exc:
+        _err(f"cannot run {VALIDATOR}: {exc}")
+        return 1
+    if result.returncode != 0:
+        _err(
+            f"{VALIDATOR} failed with exit status {result.returncode}; "
+            f"{SCORES_GRID} and {SCORES_META} were not changed. "
+            f"Candidate files kept in {WORK_GRID} and {WORK_META}."
+        )
+        print("--- validator stdout ---", file=sys.stderr)
+        print(result.stdout, end="", file=sys.stderr)
+        print("--- validator stderr ---", file=sys.stderr)
+        print(result.stderr, end="", file=sys.stderr)
+        return 1
+    print(result.stdout, end="")
+
+    # 11.3, 11.7, 11.8: publish both files or neither.
+    try:
+        publish(
+            abs_path(WORK_GRID),
+            abs_path(WORK_META),
+            abs_path(SCORES_GRID),
+            abs_path(SCORES_META),
+        )
+    except PublishError as exc:
+        _err(f"{exc}; {SCORES_GRID} and {SCORES_META} were not changed")
+        return 1
+    print(f"Published {SCORES_GRID} and {SCORES_META}")
+
+    # 11.6: counts.
+    per_area, null_heat, null_tree = _summary_counts(grid)
+    for name, count in per_area:
+        print(f"{name}: {count} cells")
+    print(f"null heat_score: {null_heat} cells")
+    print(f"null tree_score: {null_tree} cells")
+    return 0
+
+
+if __name__ == "__main__":
+    sys.exit(main())

@@ -35,6 +35,10 @@
     "3.10 Write property test for clear fraction and median temperature in `pipeline/tests/test_scoring.py`": {
       "status": "passed",
       "lastRunTimestamp": 1792872848183
+    },
+    "5.17 Write property test for validator compatibility in `pipeline/tests/test_build_grid.py`": {
+      "status": "passed",
+      "lastRunTimestamp": 1792874355878
     }
   },
   "executionHistory": {
@@ -287,6 +291,61 @@
         "executionId": "f9b37a96-7530-4056-a12c-73c2af0a4f72",
         "chatSessionId": "sess_5f6132d4-be2b-474a-bf01-1ef6f717bc04",
         "timestamp": 1792873831819
+      },
+      {
+        "executionId": "f9b37a96-7530-4056-a12c-73c2af0a4f72",
+        "chatSessionId": "sess_5f6132d4-be2b-474a-bf01-1ef6f717bc04",
+        "timestamp": 1792874057821
+      }
+    ],
+    "5.14 Add metadata, serialization, and `build_outputs` to `pipeline/build_grid.py`": [
+      {
+        "executionId": "f9b37a96-7530-4056-a12c-73c2af0a4f72",
+        "chatSessionId": "sess_5f6132d4-be2b-474a-bf01-1ef6f717bc04",
+        "timestamp": 1792874058716
+      },
+      {
+        "executionId": "f9b37a96-7530-4056-a12c-73c2af0a4f72",
+        "chatSessionId": "sess_5f6132d4-be2b-474a-bf01-1ef6f717bc04",
+        "timestamp": 1792874197999
+      }
+    ],
+    "5.17 Write property test for validator compatibility in `pipeline/tests/test_build_grid.py`": [
+      {
+        "executionId": "f9b37a96-7530-4056-a12c-73c2af0a4f72",
+        "chatSessionId": "sess_5f6132d4-be2b-474a-bf01-1ef6f717bc04",
+        "timestamp": 1792874199104
+      },
+      {
+        "executionId": "f9b37a96-7530-4056-a12c-73c2af0a4f72",
+        "chatSessionId": "sess_5f6132d4-be2b-474a-bf01-1ef6f717bc04",
+        "timestamp": 1792874460719
+      }
+    ],
+    "5.18 Add I/O and `main` to `pipeline/build_grid.py`": [
+      {
+        "executionId": "f9b37a96-7530-4056-a12c-73c2af0a4f72",
+        "chatSessionId": "sess_5f6132d4-be2b-474a-bf01-1ef6f717bc04",
+        "timestamp": 1792874200042
+      },
+      {
+        "executionId": "f9b37a96-7530-4056-a12c-73c2af0a4f72",
+        "chatSessionId": "sess_5f6132d4-be2b-474a-bf01-1ef6f717bc04",
+        "timestamp": 1792874461712
+      }
+    ],
+    "5. Implement the grid builder": [
+      {
+        "executionId": "f9b37a96-7530-4056-a12c-73c2af0a4f72",
+        "chatSessionId": "sess_5f6132d4-be2b-474a-bf01-1ef6f717bc04",
+        "timestamp": 1792874461929
+      }
+    ],
+    "6.1 Create `pipeline/README.md`": [
+      {
+        "executionId": "4224e6ae-e8aa-4fd0-a4da-4db5158ad169",
+        "chatSessionId": "sess_9a0df157-4bab-41ff-97f8-8d7006959874",
+        "timestamp": 1792874533096
       }
     ]
   }

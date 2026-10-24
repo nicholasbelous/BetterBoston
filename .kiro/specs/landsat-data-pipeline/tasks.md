@@ -129,7 +129,7 @@ Build the pipeline as small Python 3 scripts in `pipeline/`, in the order set by
     - `--local` run on synthetic TIFs writes four bands and the default Scene_File; existing Scene_File stays byte-identical; window outside raster names the band and writes nothing; low Clear_Fraction warns and exits 0
     - _Requirements: 6.4, 6.6, 6.7, 6.8, 6.13_
 
-- [~] 5. Implement the grid builder
+- [x] 5. Implement the grid builder
   - [x] 5.1 Create `pipeline/build_grid.py` with scene parsing and pixel helpers
     - `SceneInfo`, `CellStats`, `SceneError`; `parse_scene` (non-empty `id`, `date` matching `^\d{4}-\d{2}-\d{2}$` and `date.fromisoformat`), `pixel_centers`, `classify_pixels`, `assign_cells`, `aggregate` (`np.unique` + `np.bincount`, unrounded values)
     - _Requirements: 7.2, 7.3, 7.4, 7.5, 7.6, 7.7, 7.8, 10.9_
@@ -162,7 +162,7 @@ Build the pipeline as small Python 3 scripts in `pipeline/`, in the order set by
     - **Property 22: Reference statistics and null rules**
     - **Validates: Requirements 8.1, 8.2, 8.5, 8.6, 8.8**
 
-  - [-] 5.9 Add geometry, demo selection, and cell properties to `pipeline/build_grid.py`
+  - [x] 5.9 Add geometry, demo selection, and cell properties to `pipeline/build_grid.py`
     - `DemoCell`, `EmptyDemoAreas`; `cell_ring`, `ring_bbox`, `cell_id`, `demo_neighborhood` (inclusive, first match in config order), `select_demo_cells` (sorted by bbox order, northing, easting), `cell_properties` (exact key order, Python `round`, `None` for null, `is_sample: False`), `build_feature`, `build_grid_obj`
     - _Requirements: 9.1, 9.2, 9.3, 9.4, 9.5, 9.6, 9.7, 9.8, 9.9, 9.11_
 
@@ -182,7 +182,7 @@ Build the pipeline as small Python 3 scripts in `pipeline/`, in the order set by
     - **Property 26: Cell properties have the exact schema and rounding**
     - **Validates: Requirements 9.6, 9.7, 9.8**
 
-  - [ ] 5.14 Add metadata, serialization, and `build_outputs` to `pipeline/build_grid.py`
+  - [x] 5.14 Add metadata, serialization, and `build_outputs` to `pipeline/build_grid.py`
     - `build_metadata` (exact `ScoreMetadata` key order, `area.bbox` from the union of `DEMO_BBOXES`, `generated_at` passed in), `dumps_grid` (compact + `\n`), `dumps_meta` (indent 2, `ensure_ascii=False`, + `\n`), `build_outputs` composing all pure steps
     - _Requirements: 9.9, 10.1, 10.2, 10.3, 10.4, 10.5, 10.6, 10.7, 10.8, 10.10_
 
@@ -194,12 +194,12 @@ Build the pipeline as small Python 3 scripts in `pipeline/`, in the order set by
     - **Property 28: Output serialization round-trips in the sample-data format**
     - **Validates: Requirements 9.9, 10.10**
 
-  - [ ] 5.17 Write property test for validator compatibility in `pipeline/tests/test_build_grid.py`
+  - [x] 5.17 Write property test for validator compatibility in `pipeline/tests/test_build_grid.py`
     - **Property 29: Builder output passes the existing validator**
     - Call `validate_scores.validate_grid` and `validate_scores.validate_metadata` on `build_outputs` results; expect zero errors and `cell_count == len(features)`
     - **Validates: Requirements 9.10, 10.4, 11.5**
 
-  - [ ] 5.18 Add I/O and `main` to `pipeline/build_grid.py`
+  - [x] 5.18 Add I/O and `main` to `pipeline/build_grid.py`
     - `load_inputs` (list every missing or unreadable path), `run_validator` (`sys.executable`, `cwd=REPO_ROOT`, relative Work_Grid/Work_Meta args, capture stdout/stderr), `publish` (two `.tmp` copies in `data/scores/`, then `os.replace` each; remove temps and name the failed file on error), `main`
     - Check order 1.8 → 10.9 → 7.10 → 7.9 → 8.8 → 9.11, then write Work_Grid/Work_Meta, validate, publish, print per-neighborhood counts and null-score counts
     - _Requirements: 1.8, 1.9, 7.1, 7.9, 7.10, 11.1, 11.2, 11.3, 11.4, 11.6, 11.7, 11.8_
@@ -213,8 +213,8 @@ Build the pipeline as small Python 3 scripts in `pipeline/`, in the order set by
     - Check exit 0, both files published, validator prints `OK:` with `REAL data, schema v1`, printed counts match the grid
     - _Requirements: 11.1, 11.3, 11.5, 11.6, 11.7_
 
-- [ ] 6. Write the pipeline README and run the final checkpoint
-  - [ ] 6.1 Create `pipeline/README.md`
+- [~] 6. Write the pipeline README and run the final checkpoint
+  - [-] 6.1 Create `pipeline/README.md`
     - Install command, numbered 5-command run order, "run from the repo root; each must exit 0 before the next", test command `pytest pipeline/tests -q`
     - Optional `find_scene.py` step (only when Clear_Fraction < 0.95, then rerun fetch and build); `--local DIR` fallback with the 4 EarthExplorer files, replacing the fetch step, `boston_boundary.py` still first; scene ID source with `--local` and that the Scene_File is never overwritten by the Fetcher
     - _Requirements: 12.1, 12.2, 12.3, 12.4, 12.5, 12.6, 12.7, 12.8_
