@@ -3,8 +3,7 @@ import Link from "next/link";
 import { card } from "@/components/ui/classes";
 
 export default function AboutPage() {
-  // TODO (task 6.2): read data/scores/demo_grid.meta.json and show the real
-  // scene date, thresholds, and covered neighborhoods instead of hard-coded text.
+  // Dates and sources match data/scores/demo_grid.meta.json (LC09 scene, 2024-06-25).
   return (
     <article className="mx-auto flex w-full max-w-2xl flex-col gap-5 px-5 py-8">
       <h1 className="font-display text-3xl font-bold tracking-tight">About the data</h1>
@@ -12,21 +11,55 @@ export default function AboutPage() {
       <section className={`${card} p-5`}>
         <h2 className="font-display text-lg font-semibold">Heat</h2>
         <p className="mt-2 text-sm leading-relaxed text-ink-dim">
-          We use the NASA/USGS Landsat satellite. It measures how hot the ground and rooftops were
-          on one clear summer day. This is the surface temperature, not the air temperature you
-          feel. We compare your block with the Boston average.
+          We use the NASA/USGS Landsat 9 satellite. It measured how hot the ground and rooftops got
+          on one clear summer day, June 25, 2024, around 11:30 a.m. This is the surface temperature,
+          not the air temperature you feel. We compare each block with all of Boston.
         </p>
-        {/* TODO: link https://www.usgs.gov/landsat-missions/landsat-collection-2-level-2-science-products */}
+        <a
+          href="https://www.usgs.gov/landsat-missions/landsat-collection-2-level-2-science-products"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="mt-2 inline-block text-xs text-mint underline underline-offset-2"
+        >
+          USGS Landsat Collection 2 Level-2
+        </a>
       </section>
 
       <section className={`${card} p-5`}>
-        <h2 className="font-display text-lg font-semibold">Trees and green space</h2>
+        <h2 className="font-display text-lg font-semibold">Green cover</h2>
         <p className="mt-2 text-sm leading-relaxed text-ink-dim">
-          We use the MassGIS 2025 aerial photos, which include an infrared band. Plants reflect a
-          lot of infrared light, so we can tell green areas from pavement and roofs. These photos
-          were taken in spring 2025, before most trees had leaves.
+          We use the same Landsat image. Plants reflect a lot of infrared light, so we can tell green
+          areas from pavement and roofs. Trees were in leaf that day. Each satellite pixel is about
+          30 m (100 ft) wide, so grass, yards, and trees are counted together. We call it
+          &ldquo;green cover,&rdquo; not tree canopy.
         </p>
-        {/* TODO: link https://www.mass.gov/info-details/massgis-data-2025-aerial-imagery */}
+      </section>
+
+      <section className={`${card} p-5`}>
+        <h2 className="font-display text-lg font-semibold">The photo of your block</h2>
+        <p className="mt-2 text-sm leading-relaxed text-ink-dim">
+          The photo at the top of your report is a MassGIS aerial photo, taken from a plane between
+          March 18 and April 23, 2025. It covers all of Massachusetts. It is for seeing your block.
+          The scores do not come from it.
+        </p>
+        <a
+          href="https://www.mass.gov/info-details/massgis-data-2025-aerial-imagery"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="mt-2 inline-block text-xs text-mint underline underline-offset-2"
+        >
+          MassGIS 2025 aerial imagery
+        </a>
+      </section>
+
+      <section className={`${card} p-5`}>
+        <h2 className="font-display text-lg font-semibold">Live local conditions</h2>
+        <p className="mt-2 text-sm leading-relaxed text-ink-dim">
+          Weather and heat alerts come from the National Weather Service. Air quality is a modeled
+          estimate from Open-Meteo. Flood zones come from FEMA and Climate Ready Boston. Street trees,
+          community centers, and libraries come from the City of Boston and Analyze Boston. Each card
+          shows its source and when it was updated.
+        </p>
       </section>
 
       <section className={`${card} p-5`}>
@@ -46,14 +79,7 @@ export default function AboutPage() {
         </p>
       </section>
 
-      <section className={`${card} p-5`}>
-        <h2 className="font-display text-lg font-semibold">Sample data in this demo</h2>
-        <p className="mt-2 text-sm leading-relaxed text-ink-dim">
-          Until the real data is connected, the scores, map colors, flood and air-quality tiles, improvement
-          estimates and action ideas you see are made-up samples. Screens that show them carry a red
-          &ldquo;Sample data&rdquo; notice. The house pictures are illustrations.
-        </p>
-      </section>
+
 
       <Link href="/" className="text-sm font-medium text-mint hover:underline">
         Back to search

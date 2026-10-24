@@ -130,7 +130,7 @@ export default function AddressSearch() {
           ))}
         </ul>
         <p className="mt-1.5 px-5 text-[11px] leading-snug text-ink-mute lg:px-0">
-          Demo addresses use sample data. Boston demo areas only.
+          Scores cover Chinatown, West Roxbury, and East Boston for now. Aerial photos work statewide.
         </p>
       </div>
     </div>

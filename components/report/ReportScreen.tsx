@@ -53,13 +53,17 @@ function heatHeadline(level: ReturnType<typeof levelFromScore>): string {
 function heatDetail(cell: ScoreCell, metadata: ScoreMetadata): string {
   const parts: string[] = [];
   if (cell.temp_diff_f !== null) {
-    const when = metadata.is_sample ? "" : ` on ${metadata.heat.scene_date}`;
+    const d = new Date(`${metadata.heat.scene_date}T12:00:00`);
+    const date = Number.isNaN(d.getTime())
+      ? metadata.heat.scene_date
+      : d.toLocaleDateString("en-US", { month: "long", day: "numeric", year: "numeric" });
+    const when = metadata.is_sample ? "" : ` on ${date}`;
     parts.push(
-      `The ground here ran ${Math.abs(cell.temp_diff_f).toFixed(1)}\u00B0F ${cell.temp_diff_f >= 0 ? "hotter" : "cooler"} than ${metadata.heat.reference_area}${when}.`,
+      `The ground here ran about ${Math.abs(cell.temp_diff_f).toFixed(0)}\u00B0F ${cell.temp_diff_f >= 0 ? "hotter" : "cooler"} than the ${metadata.heat.reference_area} average${when}.`,
     );
   }
   if (cell.pct_vegetated !== null) {
-    parts.push(`About ${Math.round(cell.pct_vegetated)}% of the block looked green in the aerial photo.`);
+    parts.push(`About ${Math.round(cell.pct_vegetated)}% of the block looked green from the satellite.`);
   }
   parts.push("Heat is ground surface temperature on one summer day, not air temperature.");
   return parts.join(" ");

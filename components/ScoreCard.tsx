@@ -36,12 +36,12 @@ function meaning(kind: ScoreCardProps["kind"], cell: ScoreCell | null, metadata:
 
   const caption = metadata?.tree.leaf_off
     ? "From a spring photo taken before most trees had leaves, so it can undercount trees."
-    : "";
+    : "Measured from a summer satellite image, with trees in leaf. Counts grass and trees together.";
   if (!cell || cell.tree_score === null || cell.pct_vegetated === null) {
     return { line: "Not enough clear data for this block.", caption };
   }
   return {
-    line: `About ${Math.round(cell.pct_vegetated)}% of this block looked green in the aerial photo.`,
+    line: `About ${Math.round(cell.pct_vegetated)}% of this block looked green from the satellite.`,
     caption,
   };
 }

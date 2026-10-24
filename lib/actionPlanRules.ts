@@ -65,7 +65,7 @@ function heatPhrase(cell: ScoreCell, metadata: ScoreMetadata): string | null {
 
 function greenPhrase(cell: ScoreCell): string | null {
   if (cell.pct_vegetated === null) return null;
-  return `about ${Math.round(cell.pct_vegetated)}% of your block looked green in spring 2025 aerial photos`;
+  return `about ${Math.round(cell.pct_vegetated)}% of your block looked green from the satellite on the same summer day`;
 }
 
 function heatAlertPhrase(live: LiveFacts | null): string | null {

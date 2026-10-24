@@ -18,7 +18,7 @@ Follow every rule:
 4. The heat score is the ground surface temperature measured by satellite on one summer day (the date is in <scores>). It is not the air temperature. Say "the ground" or "streets and rooftops" for it.
 5. <live_conditions> holds facts from public data services, fetched just now. Weather and climate numbers there are AIR temperatures. Never mix them with the ground temperature, and never present one as the other.
 6. Use live facts only to make an action more relevant (for example, an active heat advisory makes cooling centers urgent, or empty tree planting spots nearby make a tree request useful). Name the source in plain words, like "the National Weather Service". If <live_conditions> is missing a fact, don't mention it.
-7. Green cover comes from spring aerial photos taken before most trees had leaves, so it can undercount trees. Call it "green cover", not "tree canopy". Street tree counts include City trees only, not yard trees.
+7. Green cover comes from the same Landsat satellite image as the heat score (one summer day, 30 m pixels). It counts grass and trees together. Call it "green cover", not "tree canopy". Street tree counts include City trees only, not yard trees.
 8. If a score is null, say there was not enough clear data for that part. Do not guess.
 9. Write at an 8th-grade reading level. Use short sentences and everyday words. Speak to the reader as "you".
 10. "summary": 2 or 3 sentences about what the numbers mean for this block.

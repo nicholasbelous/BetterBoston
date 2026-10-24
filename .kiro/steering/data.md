@@ -5,7 +5,7 @@
 | Data | Source | Used for |
 |---|---|---|
 | Land surface temperature | [USGS Landsat Collection 2 Level-2](https://www.usgs.gov/landsat-missions/landsat-collection-2-level-2-science-products), band `ST_B10` + `QA_PIXEL` | Heat score |
-| Aerial photos, 4-band (R, G, B, NIR) | [MassGIS 2025 Aerial Imagery](https://www.mass.gov/info-details/massgis-data-2025-aerial-imagery), JPEG 2000 tiles, 15 cm | Green cover score |
+| Surface reflectance (red + NIR) | Same Landsat scene (C2 L2 SR bands), 30 m | Green cover score (decided by the pipeline spec: summer, leaf-on, `leaf_off: false`) |
 | Aerial photo tiles (RGB only) | MassGIS 2025 Aerial Imagery tile service on ArcGIS Online. Statewide; returns 404 outside Massachusetts | Map screen and report photo (display only) |
 | Programs | Curated JSON in `data/programs/`, from official pages (boston.gov, masssave.com, masscec.com, mass.gov) | Action plan |
 
