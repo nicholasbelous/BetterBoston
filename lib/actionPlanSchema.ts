@@ -36,9 +36,9 @@ const FACT_PATTERNS: RegExp[] = [
   /\bhttps?:\/\/\S+|\bwww\.\S+/gi, // web addresses
 ];
 
-/** Facts in `text` that do not appear anywhere in the allowed programs' JSON. */
-export function findUnsupportedFacts(text: string, programs: Program[]): string[] {
-  const corpus = JSON.stringify(programs).toLowerCase();
+/** Facts in `text` that do not appear anywhere in the allowed programs' JSON (or `extraFacts`). */
+export function findUnsupportedFacts(text: string, programs: Program[], extraFacts?: unknown): string[] {
+  const corpus = (JSON.stringify(programs) + (extraFacts === undefined ? "" : JSON.stringify(extraFacts))).toLowerCase();
   const found: string[] = [];
   for (const pattern of FACT_PATTERNS) {
     for (const match of text.matchAll(pattern)) {
@@ -56,9 +56,10 @@ export type ValidationResult =
 /**
  * Checks the raw model output. Drops actions with unknown or repeated program ids.
  * Fails if fewer than MIN_ACTIONS valid actions remain, or if the text contains
- * a phone number, dollar amount, email, or URL that isn't in the program data.
+ * a phone number, dollar amount, email, or URL that isn't in the program data
+ * or the live facts we sent (`extraFacts`).
  */
-export function validateModelPlan(raw: unknown, allowed: Program[]): ValidationResult {
+export function validateModelPlan(raw: unknown, allowed: Program[], extraFacts?: unknown): ValidationResult {
   const parsed = modelActionPlanSchema.safeParse(raw);
   if (!parsed.success) return { ok: false, reason: `schema: ${z.prettifyError(parsed.error)}` };
 
@@ -74,7 +75,7 @@ export function validateModelPlan(raw: unknown, allowed: Program[]): ValidationR
   }
 
   const text = [parsed.data.summary, ...actions.flatMap((a) => [a.title, a.why])].join("\n");
-  const unsupported = findUnsupportedFacts(text, allowed);
+  const unsupported = findUnsupportedFacts(text, allowed, extraFacts);
   if (unsupported.length > 0) {
     return { ok: false, reason: `unsupported facts: ${unsupported.join(", ")}` };
   }

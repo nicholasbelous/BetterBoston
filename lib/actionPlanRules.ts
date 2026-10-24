@@ -1,6 +1,8 @@
 // Rule-based action plan. Used when there is no ANTHROPIC_API_KEY, when the
 // Claude call fails, or when its output fails validation, so the demo never breaks.
-// Uses only the block's scores and the program records. No invented facts.
+// Uses only the block's scores, live facts from public APIs, and the program
+// records. No invented facts.
+import type { LiveFacts } from "@/lib/live/context";
 import type { Program, ScoreCell, ScoreMetadata, Tenure } from "@/lib/types";
 
 export const HEAT_HIGH_SCORE = 60;
@@ -9,9 +11,12 @@ export const TREE_LOW_SCORE = 40;
 const MAX_ACTIONS = 5;
 
 /** Program ids in priority order for each situation. Ids missing from the allowed list are skipped. */
-function priorityOrder(cell: ScoreCell, tenure: Tenure): string[] {
-  const hot = (cell.heat_score ?? 0) >= HEAT_HIGH_SCORE;
-  const lowGreen = cell.tree_score !== null && cell.tree_score <= TREE_LOW_SCORE;
+function priorityOrder(cell: ScoreCell, tenure: Tenure, live: LiveFacts | null): string[] {
+  // An active NWS heat alert makes heat actions urgent, whatever the block's score.
+  const hot = (cell.heat_score ?? 0) >= HEAT_HIGH_SCORE || live?.weather?.heat_alert === true;
+  const lowGreen =
+    (cell.tree_score !== null && cell.tree_score <= TREE_LOW_SCORE) ||
+    (live?.street_trees?.empty_planting_sites ?? 0) > 0;
 
   const heat = ["boston-cooling-centers", "boston-alertboston"];
   const trees = ["boston-street-tree-request"];
@@ -49,7 +54,10 @@ export function formatDate(isoDate: string): string {
 function heatPhrase(cell: ScoreCell, metadata: ScoreMetadata): string | null {
   if (cell.temp_diff_f === null) return null;
   const d = cell.temp_diff_f;
-  const when = `on ${formatDate(metadata.heat.scene_date)}`;
+  // SAMPLE metadata has no real scene date; leave the date out rather than print "on SAMPLE".
+  const when = /^\d{4}-\d{2}-\d{2}$/.test(metadata.heat.scene_date)
+    ? `on ${formatDate(metadata.heat.scene_date)}`
+    : "on one summer day";
   if (d >= 1) return `the ground on your block was about ${round(d)}°F hotter than the ${metadata.heat.reference_area} average ${when}`;
   if (d <= -1) return `the ground on your block was about ${round(d)}°F cooler than the ${metadata.heat.reference_area} average ${when}`;
   return `the ground on your block was about as hot as the ${metadata.heat.reference_area} average ${when}`;
@@ -60,26 +68,51 @@ function greenPhrase(cell: ScoreCell): string | null {
   return `about ${Math.round(cell.pct_vegetated)}% of your block looked green in spring 2025 aerial photos`;
 }
 
+function heatAlertPhrase(live: LiveFacts | null): string | null {
+  if (!live?.weather?.heat_alert) return null;
+  const event = live.weather.active_alerts.find((a) => /heat/i.test(a)) ?? "heat alert";
+  return `The National Weather Service has a ${event} for your area right now.`;
+}
+
+function nearestCenterPhrase(live: LiveFacts | null): string | null {
+  const c = live?.cooling_places?.nearest_community_center;
+  if (!c) return null;
+  return `The closest BCYF community center is ${c.name}, about ${c.distance_mi} miles away in a straight line.`;
+}
+
 /**
- * One "why" line per program. Every claim here is either a block number from the
- * pipeline or a fact from that program's description in data/programs.
+ * One "why" line per program. Every claim here is a block number from the
+ * pipeline, a live fact from a public API, or a fact from that program's
+ * description in data/programs.
  */
-function whyFor(program: Program, cell: ScoreCell, metadata: ScoreMetadata): string {
+function whyFor(program: Program, cell: ScoreCell, metadata: ScoreMetadata, live: LiveFacts | null): string {
   const heat = heatPhrase(cell, metadata);
   const green = greenPhrase(cell);
   const hot = (cell.heat_score ?? 0) >= HEAT_HIGH_SCORE;
+  const alert = heatAlertPhrase(live);
 
   switch (program.id) {
-    case "boston-cooling-centers":
-      return hot && heat
-        ? `${capitalize(heat)}. During extreme heat, BCYF community centers open as cooling centers, and anyone can go.`
-        : "Even cooler blocks get heat waves. During extreme heat, BCYF community centers open as cooling centers, and anyone can go.";
+    case "boston-cooling-centers": {
+      const lead = alert ?? (hot && heat ? `${capitalize(heat)}.` : "Even cooler blocks get heat waves.");
+      const nearest = nearestCenterPhrase(live);
+      return [lead, "During extreme heat, BCYF community centers open as cooling centers, and anyone can go.", nearest]
+        .filter(Boolean)
+        .join(" ");
+    }
     case "boston-alertboston":
-      return "You'll get a text, call, or email when the City declares a heat emergency, so you can plan ahead.";
-    case "boston-street-tree-request":
-      return green
-        ? `${capitalize(green)}. Street trees shade sidewalks and help cool the ground.`
-        : "Street trees shade sidewalks and help cool the ground.";
+      return alert
+        ? `${alert} AlertBoston sends a text, call, or email when the City declares a heat emergency.`
+        : "You'll get a text, call, or email when the City declares a heat emergency, so you can plan ahead.";
+    case "boston-street-tree-request": {
+      const t = live?.street_trees;
+      const spots =
+        t && t.empty_planting_sites > 0
+          ? `The City's tree inventory lists ${t.empty_planting_sites} empty planting ${t.empty_planting_sites === 1 ? "spot" : "spots"} within ${t.within_m} m of your block.`
+          : null;
+      return [green ? `${capitalize(green)}.` : null, spots, "Street trees shade sidewalks and help cool the ground."]
+        .filter(Boolean)
+        .join(" ");
+    }
     case "mass-save-home-energy-assessment":
       return "An Energy Specialist can suggest upgrades, like insulation and air sealing, that help keep your home cooler in summer.";
     case "mass-save-income-eligible":
@@ -125,12 +158,14 @@ export function buildRulesPlan(args: {
   metadata: ScoreMetadata;
   tenure: Tenure;
   programs: Program[];
+  live?: LiveFacts | null;
 }): { summary: string; actions: { title: string; why: string; program_id: string }[] } {
   const { cell, metadata, tenure, programs } = args;
+  const live = args.live ?? null;
   const byId = new Map(programs.map((p) => [p.id, p]));
 
   const chosen: Program[] = [];
-  for (const id of priorityOrder(cell, tenure)) {
+  for (const id of priorityOrder(cell, tenure, live)) {
     const p = byId.get(id);
     if (p) chosen.push(p);
     if (chosen.length === MAX_ACTIONS) break;
@@ -150,8 +185,17 @@ export function buildRulesPlan(args: {
       ? "As a renter, these programs can help you stay cool and save energy."
       : "As an owner, these programs can help you cool your home and save energy.";
 
+  const alert = heatAlertPhrase(live);
+
   return {
-    summary: `${facts} These numbers compare your block with nearby blocks. They are not an official assessment. ${advice}`,
-    actions: chosen.map((p) => ({ title: titleFor(p), why: whyFor(p, cell, metadata), program_id: p.id })),
+    summary: [
+      alert,
+      facts,
+      "These numbers compare your block with nearby blocks. They are not an official assessment.",
+      advice,
+    ]
+      .filter(Boolean)
+      .join(" "),
+    actions: chosen.map((p) => ({ title: titleFor(p), why: whyFor(p, cell, metadata, live), program_id: p.id })),
   };
 }

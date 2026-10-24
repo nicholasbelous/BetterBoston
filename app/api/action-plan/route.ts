@@ -11,13 +11,15 @@ import {
   ACTION_PLAN_TOOL_NAME,
   buildSystemPrompt,
   buildUserPrompt,
+  liveFactsForPrompt,
 } from "@/lib/actionPlanPrompt";
+import { factsSignature, getLiveFacts } from "@/lib/live/context";
 import { buildRulesPlan } from "@/lib/actionPlanRules";
 import { modelActionPlanJsonSchema, validateModelPlan } from "@/lib/actionPlanSchema";
 import { generateJson } from "@/lib/claude";
 import { config } from "@/lib/config";
 import { filterByTenure, loadPrograms } from "@/lib/programs";
-import { getCellById } from "@/lib/scores";
+import { cellCenter, getCellById } from "@/lib/scores";
 import type { ActionPlan, ApiError, Program } from "@/lib/types";
 
 const requestSchema = z.object({
@@ -61,24 +63,36 @@ export async function POST(request: Request) {
 
   const cell = found.feature.properties;
   const { metadata } = found;
-  const cacheKey = `${cell_id}|${tenure}|${metadata.generated_at}|${programs.map((p) => p.id).join(",")}`;
+
+  // Live conditions for the cell (heat alerts, street trees, nearest centers, ...).
+  // Short timeout: anything slow is simply left out of the plan.
+  const center = cellCenter(found.feature);
+  const live = await getLiveFacts(center.lat, center.lng);
+
+  const cacheKey = [
+    cell_id,
+    tenure,
+    metadata.generated_at,
+    programs.map((p) => p.id).join(","),
+    factsSignature(live),
+  ].join("|");
   const cached = planCache.get(cacheKey);
   if (cached) return Response.json(cached);
 
   const byId = new Map(programs.map((p) => [p.id, p]));
   let source: ActionPlan["source"] = "rules";
-  let content = buildRulesPlan({ cell, metadata, tenure, programs });
+  let content = buildRulesPlan({ cell, metadata, tenure, programs, live });
 
   if (config.anthropicApiKey) {
     try {
       const raw = await generateJson({
         system: buildSystemPrompt(),
-        user: buildUserPrompt({ cell, metadata, tenure, programs }),
+        user: buildUserPrompt({ cell, metadata, tenure, programs, live }),
         toolName: ACTION_PLAN_TOOL_NAME,
         toolDescription: ACTION_PLAN_TOOL_DESCRIPTION,
         inputSchema: modelActionPlanJsonSchema as Record<string, unknown>,
       });
-      const result = validateModelPlan(raw, programs);
+      const result = validateModelPlan(raw, programs, liveFactsForPrompt(live));
       if (result.ok) {
         content = result.plan;
         source = "ai";
@@ -105,6 +119,7 @@ export async function POST(request: Request) {
     model_id: source === "ai" ? config.claudeModel : "rules",
     generated_at: new Date().toISOString(),
     based_on_sample_data: metadata.is_sample || cell.is_sample,
+    live_sources_used: live?.sources_used ?? [],
   };
   planCache.set(cacheKey, plan);
   return Response.json(plan);

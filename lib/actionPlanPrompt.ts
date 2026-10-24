@@ -1,6 +1,7 @@
 // Builds the system + user prompt for the action plan.
 // Design notes: .kiro/specs/climatecheck-mvp/design.md ("Action plan prompt").
 import "server-only";
+import type { LiveFacts } from "@/lib/live/context";
 import type { Program, ScoreCell, ScoreMetadata, Tenure } from "@/lib/types";
 
 export const ACTION_PLAN_TOOL_NAME = "submit_action_plan";
@@ -12,15 +13,17 @@ export function buildSystemPrompt(): string {
 
 Follow every rule:
 1. Recommend ONLY programs listed in <programs>. Cite each one by its exact "id". Use each program at most once.
-2. Never invent programs, phone numbers, emails, websites, dollar amounts, dates, deadlines, or eligibility rules. Only mention a detail if it appears in that program's JSON. If you are not sure, leave the detail out.
+2. Never invent programs, phone numbers, emails, websites, dollar amounts, dates, deadlines, or eligibility rules. Only mention a detail if it appears in that program's JSON or in <live_conditions>. If you are not sure, leave the detail out.
 3. The scores compare this block with other blocks in the same area. They are not official assessments. Do not call a block "dangerous" or "safe".
-4. The heat numbers are the ground surface temperature measured by satellite on one summer day (the date is in <scores>). They are not the air temperature. Say "the ground" or "streets and rooftops", never "the air".
-5. Green cover comes from spring aerial photos taken before most trees had leaves, so it can undercount trees. Call it "green cover", not "tree canopy".
-6. If a score is null, say there was not enough clear data for that part. Do not guess.
-7. Write at an 8th-grade reading level. Use short sentences and everyday words. Speak to the reader as "you".
-8. "summary": 2 or 3 sentences about what the numbers mean for this block.
-9. Return 3 to 5 actions, most useful first. "title" is a short action that starts with a verb. "why" is 1 or 2 sentences that connect the program to this block's numbers.
-10. Answer only by calling the ${ACTION_PLAN_TOOL_NAME} tool.`;
+4. The heat score is the ground surface temperature measured by satellite on one summer day (the date is in <scores>). It is not the air temperature. Say "the ground" or "streets and rooftops" for it.
+5. <live_conditions> holds facts from public data services, fetched just now. Weather and climate numbers there are AIR temperatures. Never mix them with the ground temperature, and never present one as the other.
+6. Use live facts only to make an action more relevant (for example, an active heat advisory makes cooling centers urgent, or empty tree planting spots nearby make a tree request useful). Name the source in plain words, like "the National Weather Service". If <live_conditions> is missing a fact, don't mention it.
+7. Green cover comes from spring aerial photos taken before most trees had leaves, so it can undercount trees. Call it "green cover", not "tree canopy". Street tree counts include City trees only, not yard trees.
+8. If a score is null, say there was not enough clear data for that part. Do not guess.
+9. Write at an 8th-grade reading level. Use short sentences and everyday words. Speak to the reader as "you".
+10. "summary": 2 or 3 sentences about what the numbers mean for this block.
+11. Return 3 to 5 actions, most useful first. "title" is a short action that starts with a verb. "why" is 1 or 2 sentences that connect the program to this block's numbers or live conditions.
+12. Answer only by calling the ${ACTION_PLAN_TOOL_NAME} tool.`;
 }
 
 /** Only the fields the model needs. Links are not sent; the server adds them from the program record. */
@@ -34,13 +37,22 @@ function programForPrompt(p: Program) {
   };
 }
 
+/** Live facts as sent to the model (the `sources_used` bookkeeping is dropped). */
+export function liveFactsForPrompt(live: LiveFacts | null): Omit<LiveFacts, "sources_used"> | null {
+  if (!live) return null;
+  const { sources_used: _unused, ...facts } = live;
+  void _unused;
+  return facts;
+}
+
 export function buildUserPrompt(args: {
   cell: ScoreCell;
   metadata: ScoreMetadata;
   tenure: Tenure;
   programs: Program[];
+  live?: LiveFacts | null;
 }): string {
-  const { cell, metadata, tenure, programs } = args;
+  const { cell, metadata, tenure, programs, live } = args;
   const scores = {
     neighborhood: cell.neighborhood,
     heat: {
@@ -60,11 +72,17 @@ export function buildUserPrompt(args: {
     },
   };
 
+  const liveBlock = liveFactsForPrompt(live ?? null);
+
   return `<scores>
 ${JSON.stringify(scores, null, 2)}
 </scores>
 
 <tenure>${tenure}</tenure>
+
+<live_conditions>
+${liveBlock ? JSON.stringify(liveBlock, null, 2) : "none available"}
+</live_conditions>
 
 <programs>
 ${JSON.stringify(programs.map(programForPrompt), null, 2)}

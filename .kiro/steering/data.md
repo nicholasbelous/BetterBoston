@@ -67,3 +67,30 @@ vegetated = NDVI > NDVI_THRESHOLD     # configurable in pipeline/config.py
 - `last_verified` is a `YYYY-MM-DD` date set by a **person** after checking the page. `null` means not verified, and the program is hidden from users and the AI.
 - Links shown to users come from program records, never from model output.
 - Model text containing a phone number, dollar amount, email, or URL that isn't in the program data is rejected, and the rule-based plan is used instead.
+
+## Live data (lib/live/, GET /api/live)
+
+Live values come straight from public APIs. They add context next to the scores. They **never** change, replace, or estimate a score.
+
+| Source id | Data | Provider | Coverage | Cache |
+|---|---|---|---|---|
+| `weather` | Latest observation, forecast periods, 7-day highs, "feels like" highs, UV, active alerts, `heat_alert` | National Weather Service (`api.weather.gov`) + Open-Meteo forecast | US | 5-30 min |
+| `air` | US AQI, category, PM2.5, ozone, max AQI next 24 h | Open-Meteo Air Quality (CAMS **model**) | Global | 60 min |
+| `flood` | FEMA flood zone + high-risk flag. Future flooding at 9/21/36 in of sea level rise (high tide, 10% storm, 1% storm) | FEMA NFHL + Climate Ready Boston | FEMA: US. Sea level rise: Boston | 24 h |
+| `trees` | City street trees within 100 m, empty planting sites, top species, trunk sizes | Boston BPRD tree inventory | Boston | 24 h |
+| `places` | Nearest 3 BCYF community centers, pools, libraries, with straight-line miles | Analyze Boston | Boston | 24 h |
+| `area` | Boston neighborhood. Census tract shares: older adults, children under 5, low-to-no income, disability | BPDA boundaries + Climate Ready Boston Social Vulnerability (2008-2012 ACS) | Boston | 24 h |
+| `climate` | Boston hot days (90°F+): last summer, 1991-2020 average, 2031-2050 model median and range | Open-Meteo archive + CMIP6 HighResMIP, prebuilt by `npm run build:climate` into `data/live/climate_boston.json` | Boston | file |
+
+### Live data rules
+
+- **Weather, air, and climate numbers are AIR temperatures and regional values.** Never mix them with the ground-temperature heat score, and never label one as the other.
+- Every live result carries `sources` and `fetched_at`. Show both near the value.
+- If a source returns `{ ok: false }`, **hide that card**. Never show mock, cached-from-elsewhere, or estimated live values.
+- Air quality is a **modeled estimate**. Always say so.
+- Street tree counts are **City trees only**, not yard trees. They complement the green cover score and never replace it.
+- Place phone numbers are shown **exactly as the City lists them** (often with no area code). Never add an area code.
+- BCYF centers open as cooling centers **only during declared heat emergencies**. The places data does not say which are open today. Link to boston.gov/heat.
+- Census tract shares describe the tract (2008-2012 estimates), not the household. Limited-English and medical-illness fields are left out because the dataset's definitions are unclear. People-of-color counts are left out on purpose: they aren't needed for the action plan.
+- Points outside Massachusetts get `outside_coverage` for every source. Boston-only sources return `outside_coverage` elsewhere in Massachusetts.
+- The action plan receives a small `<live_conditions>` block (`lib/live/context.ts`). The model may repeat those facts exactly. The validator allows phone numbers, dollar amounts, emails, and URLs only if they appear in the program data or the live facts.

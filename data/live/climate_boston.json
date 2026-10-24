@@ -1,0 +1,38 @@
+{
+  "generated_at": "2026-10-24T19:05:50.331Z",
+  "generated_by": "scripts/build-climate-context.mjs",
+  "location": {
+    "lat": 42.36,
+    "lng": -71.06,
+    "label": "Boston (downtown grid cell)"
+  },
+  "hot_threshold_f": 90,
+  "last_summer": {
+    "year": 2026,
+    "days_90f_or_more": 13,
+    "hottest_f": 99,
+    "hottest_date": "2026-07-03"
+  },
+  "baseline_days_90f_per_year": 8.5,
+  "projection": {
+    "model_count": 7,
+    "period_past": "1995-2014",
+    "period_future": "2031-2050",
+    "median_days_past": 5.5,
+    "median_days_future": 14.4,
+    "range_days_future": [
+      8.3,
+      15.8
+    ]
+  },
+  "sources": [
+    {
+      "name": "Open-Meteo Historical Weather (reanalysis)",
+      "url": "https://open-meteo.com/en/docs/historical-weather-api"
+    },
+    {
+      "name": "Open-Meteo Climate API (CMIP6 high-resolution models)",
+      "url": "https://open-meteo.com/en/docs/climate-api"
+    }
+  ]
+}

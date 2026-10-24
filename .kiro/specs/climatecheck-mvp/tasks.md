@@ -54,12 +54,23 @@ Ordered so the smallest working demo comes first. Task numbers match the `TODO (
 - [ ] 5.2 [P1] `TenureToggle` UI (radiogroup, renter default) that triggers a new plan request.
   - _Requirements: 7.1, 7.4_
 
+## 5b. Live data (public APIs, no AI)
+
+- [x] 5.3 [P3] `GET /api/grid` for real map colors.
+- [x] 5.4 [P3] `lib/live/http.ts`: `fetchJson` with timeout and User-Agent, TTL cache with in-flight de-duplication, ArcGIS point helpers, Massachusetts bounds check.
+- [x] 5.5 [P3] Sources: `weather` (NWS + Open-Meteo), `air` (Open-Meteo AQ), `flood` (FEMA + Climate Ready Boston), `trees` (BPRD), `places` (BCYF centers, pools, BPL), `area` (BPDA + Social Vulnerability), `climate` (prebuilt Open-Meteo history and projections).
+- [x] 5.6 [P3] `GET /api/live` (bundle) and `GET /api/live/[source]`.
+- [x] 5.7 [P3] Live facts in the action plan: `<live_conditions>` prompt block, validator corpus, live-aware rules plan, `live_sources_used`.
+- [x] 5.8 [P3] `npm run check:programs` (link and fact checker) and `npm run build:climate`.
+- [ ] 5.9 [P1] Live data cards: weather and heat alert banner, air quality tile, flood tile, street trees, nearest cooling places, climate trend. Each shows its source and time, and hides when `ok: false`.
+- [ ] 5.10 [P1] Map colors from `/api/grid` instead of `MOCK_GRID`.
+
 ## 6. Polish
 
 - [ ] 6.1 [P1] Mobile pass at 375 px wide: tap targets, contrast, colors for the heat and green cards.
 - [ ] 6.2 [P1] About page reads `demo_grid.meta.json`: sources, dates, thresholds, limitations.
   - _Requirements: 8.1, 8.2_
-- [ ] 6.3 [P3] Kiro steering, spec, and hook (`.kiro/`). Write the README sections for architecture, environment variables, and "How we used Kiro."
+- [x] 6.3 [P3] Kiro steering, spec, and hooks (`.kiro/`). Draft README sections for architecture, environment variables, and "How we used Kiro."
 
 ## 7. Stretch
 

@@ -9,12 +9,12 @@ Type a Massachusetts address and get a plain-English climate report for your blo
 | Part | Status |
 |---|---|
 | Next.js app, config, `.env.example`, shared types | Done |
-| Backend API: `/api/geocode`, `/api/score`, `/api/action-plan` (Person 3) | Done. Action plan uses the rules fallback until `ANTHROPIC_API_KEY` is set **and** programs are verified |
+| Backend API: `/api/geocode`, `/api/score`, `/api/grid`, `/api/action-plan` (Person 3) | Done. The action plan uses the rules fallback until `ANTHROPIC_API_KEY` is set, and needs programs verified |
 | Frontend: `/`, `/map`, `/report`, `/actions`, `/improvements`, `/about` (Person 1) | Merged. Calls the real APIs, falls back to labeled mocks. Fixes needed, see Person 1's list |
 | Sample score grid + validator (Person 2) | Done: 944 SAMPLE cells in Chinatown, West Roxbury, East Boston. `npm run validate:data` passes |
 | Real scores: NDVI + Landsat heat pipeline (Person 2) | **Not started.** Landsat scene is downloaded. This is the biggest demo risk |
-| Program data, `data/programs/` (Person 3) | 8 programs drafted from official pages. **None verified**, so `/api/action-plan` returns 503 `no_programs` |
-| Live data APIs: weather, heat alerts, air, flood, street trees, cooling centers (Person 3) | **Not started.** Sources picked and tested, see Person 3's list |
+| Program data, `data/programs/` (Person 3) | 8 programs drafted from official pages. `npm run check:programs` passes (all links load, all facts found on their pages). **A person still has to set `last_verified`**. Until then `/api/action-plan` returns 503 `no_programs` |
+| Live data: `/api/live` with weather + heat alerts, air quality, flood, street trees, cooling places, area, and climate (Person 3) | **Done.** Tested for all 3 neighborhoods plus outside Boston and outside MA. Person 1 builds the cards (contract in Person 3's section) |
 | Kiro: steering, spec, hooks in `.kiro/` | Done |
 | `Initial-Kiro-Design/` | Old FastAPI + Vite prototype. Reference only, excluded from lint and tsc |
 
@@ -24,11 +24,13 @@ Type a Massachusetts address and get a plain-English climate report for your blo
 |---|---|---|
 | Heat score | Landsat 9, June 25, 2024, through our pipeline | Offline, `data/scores/` |
 | Green cover score | MassGIS 2025 aerial photos (NDVI), through our pipeline | Offline, `data/scores/` |
-| Today's weather + heat alerts | National Weather Service API, Open-Meteo fallback | Live, Person 3 |
-| Air quality | Open-Meteo Air Quality API (modeled) | Live, Person 3 |
-| Flood zone + future sea-level-rise flooding | FEMA flood maps + Climate Ready Boston | Live, Person 3 |
-| Street trees nearby | City of Boston street tree inventory (BPRD Trees) | Live, Person 3 |
-| Nearest community centers | City of Boston Community Centers dataset | Live, Person 3 |
+| Today's weather, 7-day outlook, heat alerts | National Weather Service + Open-Meteo | Live, `/api/live` |
+| Air quality | Open-Meteo Air Quality API (modeled) | Live, `/api/live` |
+| Flood zone + future sea-level-rise flooding | FEMA flood maps + Climate Ready Boston | Live, `/api/live` |
+| Street trees + empty planting spots nearby | City of Boston street tree inventory (BPRD Trees) | Live, `/api/live` |
+| Nearest community centers, pools, libraries | Analyze Boston (BCYF centers, pools, BPL branches) | Live, `/api/live` |
+| Neighborhood + census tract context | BPDA boundaries + Climate Ready Boston Social Vulnerability | Live, `/api/live` |
+| Boston hot days: last summer, 1991-2020, 2031-2050 | Open-Meteo historical + CMIP6 climate models | Prebuilt, `data/live/climate_boston.json` |
 | Action plan text | Claude, **only** from verified `data/programs/` and the facts above. Rules fallback if anything fails | Server-side |
 
 ## Quick start
@@ -79,7 +81,7 @@ Owns `app/` pages (not `app/api/`), `components/`, `hooks/`, `services/`, `mocks
 
 **Fix first (these break the demo)**
 - [ ] **Default location.** `DEFAULT_DEMO_ADDRESS` and the first demo chip are 72 Beacon St (Beacon Hill), which is outside the score grid. Every screen opened without an address shows "Coverage coming soon." Switch the default and the chips to the demo points that hit real cells (Chinatown, West Roxbury, East Boston). Use Person 2's final demo addresses when they're ready.
-- [ ] **Map colors.** `MapScreen` always colors `MOCK_GRID`, so the colors contradict the score cards. Color the map from Person 3's new `GET /api/grid` and drop `MOCK_GRID` once that's merged. Make the `selected-outline` layer match real `cell_id`s.
+- [ ] **Map colors.** `MapScreen` always colors `MOCK_GRID`, so the colors contradict the score cards. Color the map from `GET /api/grid` (ready now) and drop `MOCK_GRID`. Make the `selected-outline` layer match real `cell_id`s.
 - [ ] **"Written by AI" label.** `ActionPlanList` shows it on every plan. Show it only when `plan.source === "ai"`. For `"rules"`, say "Built from our checked program list."
 - [ ] **Silent address swap.** When `/api/geocode` fails, `geocodeAddress` quietly swaps in a demo address ("Beacon St, Brookline" becomes "72 Beacon St, Boston"). Show "Showing a demo address because live search is down" whenever `origin === "mock"`.
 
@@ -96,14 +98,16 @@ Owns `app/` pages (not `app/api/`), `components/`, `hooks/`, `services/`, `mocks
 **Connect to real data**
 - [ ] **Aerial photo on the report.** The report shows a drawn house. The spec calls for the MassGIS 2025 photo of the home and block. Add a small, non-interactive `MapView` at about zoom 18, with a caption: "Aerial photo, spring 2025 (MassGIS)." Keep the drawing only as decoration.
 - [ ] **Report → Recommendations tab.** Use the same `loadActionPlan` result as `/actions` instead of `MOCK_ACTIONS.slice(0, 3)`.
-- [ ] **Live data cards** (after Person 3 merges each route; contracts are in Person 3's list):
-  - [ ] Weather card: today's high and "feels like" from `/api/weather`, labeled **"Air temperature today (National Weather Service)"** so it's never confused with the ground-temperature score.
-  - [ ] Heat alert banner: if `/api/weather` returns an active Heat Advisory or Excessive Heat Warning, show it at the top of every screen with a link to the cooling centers action.
-  - [ ] Replace the mock **Air Quality** tile with `/api/air` (US AQI plus a plain category like "Moderate"). Label it "Modeled estimate (Open-Meteo)."
-  - [ ] Replace the mock **Flood Risk** tile with `/api/flood`. Show the FEMA zone ("Zone X: minimal flood hazard") and the Climate Ready Boston future-flooding result ("Could flood in a 1% storm with 21 inches of sea level rise"). Remove the "Sample" tag once it's real.
-  - [ ] Street trees card from `/api/trees`: "27 City street trees within 100 m." Add a caption: "Counts City-owned street trees only, not yard or park trees."
-  - [ ] Nearest community centers from `/api/cooling-centers`, inside the cooling centers action, with distance and address. Add the caption: "Open as cooling centers during declared heat emergencies."
-  - [ ] Every live card shows its source and "Updated <time>." Hide the card if the route fails. Never show mock live data.
+- [ ] **Live data cards.** One call to `GET /api/live?lat&lng` returns everything. The full contract, fields, and required labels are in "Live data contract" under Person 3.
+  - [ ] Weather card: today's high and "feels like" from `weather` in `/api/live`, labeled **"Air temperature today (National Weather Service)"** so it's never confused with the ground-temperature score.
+  - [ ] Heat alert banner: if `weather.data.heat_alert` is true, show it at the top of every screen with a link to the cooling centers action.
+  - [ ] Replace the mock **Air Quality** tile with `air` from `/api/live` (US AQI plus a plain category like "Moderate"). Label it "Modeled estimate (Open-Meteo)."
+  - [ ] Replace the mock **Flood Risk** tile with `flood` from `/api/live`. Show the FEMA zone ("Zone X: minimal flood hazard") and the Climate Ready Boston future-flooding result ("Could flood in a 1% storm with 21 inches of sea level rise"). Remove the "Sample" tag once it's real.
+  - [ ] Street trees card from `trees`: "23 City street trees within 100 m · 4 empty planting spots." Add a caption: "Counts City-owned street trees only, not yard or park trees."
+  - [ ] Nearest community centers, pools, and libraries from `places`, inside the cooling centers action, with distance and address. Add the caption: "Open as cooling centers during declared heat emergencies."
+  - [ ] "Boston is getting hotter" card from `climate`: last summer's 90°F+ days vs. the 1991-2020 average vs. the 2031-2050 projection range. This is the strongest closing line for the demo.
+  - [ ] 7-day outlook chips from `weather.data.daily`, highlighting days at 90°F or more.
+  - [ ] Every live card shows its source and "Updated <time>." Hide the card when its source is `ok: false`. Never show mock live data.
 - [ ] **About page.** Read `data/scores/demo_grid.meta.json` (scene date, thresholds, neighborhoods). Add the USGS and MassGIS links (TODOs at lines 6, 19, 29). Add a "Live data" section listing NWS, Open-Meteo, FEMA, Climate Ready Boston, and Analyze Boston.
 
 **Smaller fixes**
@@ -164,61 +168,73 @@ Owns `pipeline/` and `data/scores/`. Owns the score fields in `lib/types.ts`: te
 
 ### Person 3: Backend API, live data APIs, AI action plan, Kiro — [NAME]
 
-Owns `app/api/`, `lib/` (except the score fields), `data/programs/`, `.env.example`, and `.kiro/`.
+Owns `app/api/`, `lib/` (except the score fields), `data/programs/`, `data/live/`, `scripts/`, `.env.example`, and `.kiro/`.
 
-**Done**
+**Done: core API**
 - [x] Switched from Bedrock to the Anthropic API (`lib/claude.ts`, forced tool call → JSON).
 - [x] Landsat scene picked (June 25, 2024, under 1% cloud over Boston) and downloaded to `pipeline/raw/landsat/`.
 - [x] `GET /api/geocode`: Census → Nominatim fallback, ", MA" bias, 5-second timeouts.
 - [x] `GET /api/score`: point-in-polygon lookup returning `ok` / `no_data` / `out_of_coverage`. Reloads when the files change.
-- [x] `POST /api/action-plan`: zod validation, rejects unknown program ids and invented phone numbers, dollar amounts, emails, and URLs. Rules fallback. Per-cell cache.
-- [x] 8 programs drafted from official pages in `data/programs/`.
-- [x] Kiro steering (4 files), spec (requirements, design, tasks), and two validation hooks.
+- [x] `GET /api/grid`: every score cell (trimmed) + metadata, so Person 1 can color the map with real cells (~330 KB).
+- [x] `POST /api/action-plan`:
+  - zod validation; rejects unknown program ids and invented phone numbers, dollar amounts, emails, and URLs
+  - rules fallback when Claude is unavailable or its answer fails the checks
+  - per-cell cache
+  - live facts included (see below)
+- [x] 8 programs drafted from official pages in `data/programs/`. `npm run check:programs` confirms all 8 links load and every phone number, email, and dollar amount appears on its page.
+- [x] Kiro steering (4 files, including live data rules), spec (requirements, design with every route contract, tasks), and two validation hooks.
 
-**Unblock the action plan (do first)**
-- [ ] **Verify the 8 programs (~20 min).** Open every `link`, check every sentence and `details` value, and set `last_verified` to today (`YYYY-MM-DD`). Check these most carefully: the SMART rates ($0.03 / $0.06 per kWh), the phone numbers, and community solar (it came from MassCEC because mass.gov blocked automated reading).
+**Done: live data layer** (`lib/live/`, all free, no keys). Tested for Chinatown, West Roxbury, East Boston, Worcester (MA, outside Boston), and New York (outside MA).
+- [x] `lib/live/http.ts`: JSON fetch with timeout + User-Agent, TTL cache with in-flight de-duplication, ArcGIS point helpers, Massachusetts bounds check.
+- [x] **weather:** National Weather Service latest observation (nearest station), forecast periods, and active alerts with a `heat_alert` flag (handles the 2025 "Excessive → Extreme Heat" rename). Plus Open-Meteo 7-day highs, "feels like" highs, UV, and hot days (90°F+) in the next 7.
+- [x] **air:** Open-Meteo US AQI, EPA category, PM2.5, ozone, main pollutant, and worst AQI in the next 24 h. Always marked `modeled: true`.
+- [x] **flood:** FEMA flood zone and high-risk flag, plus Climate Ready Boston future flooding at 9, 21, and 36 inches of sea level rise (high tide, 10% storm, 1% storm). Example: Chinatown is FEMA Zone X today, but a 1% storm floods it with 21 inches of sea level rise.
+- [x] **trees:** City street trees within 100 m, **empty planting sites** (spots where the City could plant), top species, and trunk-size mix. Example: Chinatown has 23 trees and 4 empty sites.
+- [x] **places:** nearest 3 BCYF community centers, BCYF pools, and library branches, with straight-line miles. Example: Chinatown's nearest community center is Quincy (0.3 mi) and its nearest library is the Chinatown branch (0.2 mi).
+- [x] **area:** Boston neighborhood (BPDA), plus census tract shares of older adults, children under 5, low-to-no income, and disability (Climate Ready Boston, 2008-2012 ACS).
+- [x] **climate:** Boston hot days (90°F+): 13 in summer 2026 (hottest 99°F on July 3), about 8.5 a year in 1991-2020, and a median of 14.4 a year for 2031-2050 across 7 models (range 8.3-15.8). These are prebuilt by `npm run build:climate`, because long climate series hit Open-Meteo's free-tier limits.
+- [x] `GET /api/live?lat&lng` (all sources in one call, ~1-2 s cold, instant cached) and `GET /api/live/<source>?lat&lng`.
+- [x] **The action plan uses live facts.** A `<live_conditions>` block goes into the prompt, and the validator allows only facts that appear in the program data or the live data. For example, a center's phone with an added area code gets rejected. The rules plan puts cooling centers + AlertBoston first and leads with the warning when NWS has a heat alert, names the nearest community center, and cites empty tree planting sites. `ActionPlan.live_sources_used` lists the sources used.
+- [x] `LIVE_DATA_ENABLED=false` turns off every live call for an offline demo.
+
+**Still to do: only a person can do these**
+- [ ] **Verify the 8 programs (~15 min).** Run `npm run check:programs`, then open each link, read each sentence, and set `last_verified` to today (`YYYY-MM-DD`). Until then `/api/action-plan` returns 503 `no_programs`. For local testing, use `ALLOW_UNVERIFIED_PROGRAMS=true` in `.env.local`.
 - [ ] **Add `ANTHROPIC_API_KEY`** to `.env.local`. Restart `npm run dev` and confirm `source: "ai"` for a Chinatown cell.
-- [ ] **Check AI output.** Read 5-10 plans (both tenures, all 3 neighborhoods). Every program name and number must appear in `data/programs/`. Tighten the prompt if anything drifts.
+- [ ] **Check AI output.** Read 5-10 plans (both tenures, all 3 neighborhoods). Every program name and number must appear in `data/programs/` or the live data. Tighten the prompt in `lib/actionPlanPrompt.ts` if anything drifts.
+- [ ] **Hand Person 1 the contracts below** and help wire the first live card (weather + heat alert).
+- [ ] Before the demo, run `npm run build:climate` once more (about 2 min) so "last summer" is current.
 
-**`GET /api/grid` (Person 1 needs this for real map colors)**
-- [ ] Return the full `data/scores/demo_grid.geojson` (properties trimmed to `cell_id`, `heat_score`, `tree_score`, `neighborhood`, `is_sample`) plus `metadata.is_sample`. Cache it like `loadScores`. Send the contract to Person 1.
-
-**Live data APIs, no AI involved.** All free. The first five need no key. Put each one in `lib/live/<name>.ts` with a route in `app/api/<name>/route.ts`.
-- [ ] **Shared plumbing, `lib/live/http.ts`:** `fetchJson(url, { timeoutMs: 5000, headers })`, a small in-memory TTL cache keyed by rounded lat/lng (3 decimals ≈ 100 m), and a `LiveResult<T> = { data: T, source: string, source_url: string, fetched_at: string }` type in `lib/types.ts`. Reuse `GEOCODER_USER_AGENT` for the User-Agent.
-- [ ] **`GET /api/weather?lat&lng`: National Weather Service** (`api.weather.gov`, no key, needs a User-Agent).
-  - `GET /points/{lat},{lng}` → `properties.forecast` URL → first 2 periods (name, temperature, shortForecast).
-  - `GET /alerts/active?point={lat},{lng}` → event names. Flag `heat_alert: true` for "Heat Advisory," "Excessive Heat Warning," "Extreme Heat Warning," or "Excessive Heat Watch."
-  - Fallback when NWS fails: **Open-Meteo** `api.open-meteo.com/v1/forecast?current=temperature_2m,apparent_temperature&daily=temperature_2m_max,apparent_temperature_max,uv_index_max&temperature_unit=fahrenheit`.
-  - Cache the forecast for 30 min and alerts for 5 min.
-  - Response: `{ today: {high_f, feels_like_high_f?, summary}, tonight: {low_f}, uv_index_max?, alerts: string[], heat_alert: boolean }` + `LiveResult` fields.
-- [ ] **`GET /api/air?lat&lng`: Open-Meteo Air Quality** (`air-quality-api.open-meteo.com/v1/air-quality?current=us_aqi,pm2_5,ozone`, no key). Map the AQI to the EPA categories (0-50 Good, 51-100 Moderate, 101-150 Unhealthy for Sensitive Groups, …). Label it "modeled estimate." Cache for 60 min.
-  - Optional upgrade: AirNow (EPA) for real monitor readings. It needs a free key, `AIRNOW_API_KEY`.
-- [ ] **`GET /api/flood?lat&lng`: FEMA + Climate Ready Boston** (ArcGIS REST point queries, no key).
-  - FEMA National Flood Hazard Layer: `hazards.fema.gov/arcgis/rest/services/public/NFHL/MapServer/28/query` → `FLD_ZONE`, `ZONE_SUBTY`, `SFHA_TF` (true means a high-risk zone).
-  - Climate Ready Boston Sea Level Rise Inundation: `services.arcgis.com/sFnw0xNflSi8J0uh/arcgis/rest/services/Climate_Ready_Boston_Sea_Level_Rise_Inundation/FeatureServer/{7,1,4}/query` with `returnCountOnly=true` → whether the point floods in a 1% annual storm with 9, 21, or 36 inches of sea level rise.
-  - Tested: Chinatown is FEMA Zone X but floods in the 21-inch and 36-inch scenarios. East Boston at Jeffries Point is the same. West Roxbury is not in any of the three.
-  - Cache for 24 h. Response: `{ fema_zone, fema_high_risk, future_flood: {sl9in, sl21in, sl36in} }` + sources.
-- [ ] **`GET /api/trees?lat&lng`: Boston street trees** (Analyze Boston BPRD Trees, `services.arcgis.com/sFnw0xNflSi8J0uh/arcgis/rest/services/BPRD_Trees/FeatureServer/0/query`, `distance=100&units=esriSRUnit_Meter`).
-  - Return the count plus the top 3 species (`spp_com`).
-  - Tested: Chinatown has 27, East Boston 39, West Roxbury 2. West Roxbury's trees are mostly in yards, which the city inventory doesn't count. **Always label it "City street trees only."** It complements the NDVI score and never replaces it.
-  - Cache for 24 h.
-- [ ] **`GET /api/cooling-centers?lat&lng`: Boston Community Centers** (Analyze Boston, 35 BCYF centers, GeoJSON or `Community_Centers/FeatureServer`).
-  - Download once to `data/live/community_centers.geojson` (small, refresh before the demo), or query live.
-  - Return the nearest 3 with name (`SITE`), street, neighborhood, and straight-line distance.
-  - The dataset's phone numbers have no area code (e.g. "635-5120"). Don't add one. Show the phone as given or leave it out.
-  - Always caption: "BCYF centers open as cooling centers during declared heat emergencies. Check boston.gov/heat."
-- [ ] **Use live facts in the action plan.** Add a `<live_conditions>` block to `buildUserPrompt` (heat alert yes/no, today's high, AQI category, flood results, street tree count, nearest center name). Add those values to the corpus `validateModelPlan` checks, so real numbers pass and invented ones still fail. In `actionPlanRules.ts`, put cooling centers + AlertBoston first when `heat_alert` is true, and put the street tree request higher when the tree count is low.
-- [ ] **Honesty rules for live data** (add them to `.kiro/steering/data.md`): live weather is **air** temperature and must never be mixed with the ground-temperature score. Every live value carries its source and fetch time. If a source fails, return 502/503 and the UI hides the card. **Never fall back to made-up live data.**
-- [ ] Update `.env.example` (optional `AIRNOW_API_KEY`) and the design doc (`.kiro/specs/climatecheck-mvp/design.md`) with the new routes.
-- [ ] Send Person 1 the route contracts as each one merges. Merge each route as its own small PR.
-
-**Stretch**
-- [ ] `GET /api/solar?lat&lng`: Google Solar API (`buildingInsights:findClosest`, `GOOGLE_SOLAR_API_KEY`). Show it for owners only, and only when the key is set.
-- [ ] Climate Ready Boston Social Vulnerability (Analyze Boston) as context in the plan ("more older adults or people with medical conditions live here"). Only use the dataset's own wording.
+**Stretch (only if everything above is done)**
+- [ ] `GET /api/live/solar`: Google Solar API (`buildingInsights:findClosest`, needs `GOOGLE_SOLAR_API_KEY`). Show it for owners only. (NREL PVWatts timed out from our network, so skip it.)
+- [ ] EPA AirNow monitor readings next to the modeled AQI (free key, `AIRNOW_API_KEY`).
+- [ ] Prefetch `/api/live` for the 3 demo addresses right before recording, so every card loads instantly.
 
 **Final hour**
-- [ ] README sections: architecture, environment variables, and "How we used Kiro" (specs, steering, hooks).
-- [ ] Help Person 1 record the demo video.
+- [ ] README sections: architecture, environment variables, and "How we used Kiro." Drafts are in "Write-up drafts" below.
+- [ ] Help Person 1 record the demo video. Follow the demo script below.
+
+#### Live data contract (for Person 1)
+
+`GET /api/live?lat=42.3498&lng=-71.0603` returns one object with seven sources. Each source looks like this:
+
+```ts
+{ ok: true,  data: {...}, sources: [{ name, url }], fetched_at: "2026-10-24T19:05:00Z", note?: "..." }
+{ ok: false, error: "outside_coverage" | "unavailable" | "disabled", message: "..." }   // hide the card
+```
+
+| Card | Field(s) | Show as | Required label |
+|---|---|---|---|
+| Heat alert banner (top of every screen) | `weather.data.heat_alert`, `weather.data.alerts[].event` | "Heat Advisory in effect (National Weather Service)" + link to the cooling centers action | Source + time |
+| Weather today | `weather.data.forecast[0]`, `observed.temperature_f`, `daily[0].feels_like_high_f`, `current_uv_index` | "Today: 60°F, Sunny · Feels like 58°F · UV 3" | **"Air temperature (National Weather Service)."** Never next to the heat score without this label |
+| Hot days this week | `weather.data.hot_days_next_7`, `daily[]` | 7 small day chips, highlighted when `high_f >= 90` | "Forecast (Open-Meteo)" |
+| Air quality (replaces the mock tile) | `air.data.us_aqi`, `category`, `max_category_next_24h` | "AQI 65 · Moderate" with the EPA color | **"Modeled estimate (Open-Meteo)"** |
+| Flood (replaces the mock tile) | `flood.data.fema_zone`, `fema_zone_description`, `fema_high_risk`, `first_flooded_at_in`, `future[]` | "FEMA Zone X: minimal flood hazard today. Could flood in a 1-in-100-year storm with 21 inches of sea level rise." | "FEMA + Climate Ready Boston" |
+| Street trees | `trees.data.tree_count`, `empty_planting_sites`, `top_species[0].name` | "23 City street trees within 100 m · 4 empty planting spots · Most common: Ginkgo" | **"City street trees only, not yard trees"** |
+| Places to cool off | `places.data.community_centers[]`, `libraries[]`, `pools[]` | Name, address, "0.3 mi" | **"BCYF centers open as cooling centers during declared heat emergencies. Check boston.gov/heat."** Phone exactly as given |
+| Boston is getting hotter | `climate.data.baseline_days_90f_per_year`, `last_summer.days_90f_or_more`, `projection.median_days_future`, `range_days_future` | "Boston had 13 days of 90°F+ in 2026. The 1991-2020 average was about 8.5. Models project about 14 a year by 2031-2050 (range 8-16)." | "Boston-area air temperature, from weather and climate models" |
+| Who lives here (optional) | `area.data.neighborhood`, `area.data.tract.pct_*` | "Older adults: 13.8% of this census tract" | "2008-2012 census estimates (Climate Ready Boston). Describes the tract, not your household" |
+
+`GET /api/grid` returns every cell with `heat_score`, `tree_score`, `temp_diff_f`, `pct_vegetated`, and `is_sample`, so you can replace `MOCK_GRID` in `MapScreen`. `ActionPlan` now includes `source` (`"ai"` or `"rules"`) and `live_sources_used`.
 
 ---
 
@@ -229,8 +245,8 @@ Owns `app/api/`, `lib/` (except the score fields), `data/programs/`, `.env.examp
 | 0:15 | Decisions made, everyone running `npm run dev` | All ✅ |
 | 1:00 | Sample grid committed. Landsat scene downloaded | P2, P3 ✅ |
 | 2:00 | Address search → map → report works end to end on sample data | P1, P3 ✅ |
-| 3:00 | Real green cover scores committed (heat `null`). Programs verified. `/api/grid` merged | P2, P3 |
-| 4:00 | Weather + heat alert, air, and flood routes merged. Frontend default location and map colors fixed | P3, P1 |
+| 3:00 | Real green cover scores committed (heat `null`). Programs verified. `/api/grid` merged ✅ | P2, P3 |
+| 4:00 | All live data routes merged ✅. Frontend default location and map colors fixed | P3, P1 |
 | 4:30 | Real heat scores in the grid. AI plan working with a key | P2, P3 |
 | 5:30 | **Feature freeze.** Live data cards and honesty fixes in the UI | P1 |
 | 6:30 | Demo addresses tested on a phone. Video recorded. README finished | All |
@@ -243,6 +259,63 @@ If real data runs late, demo with the sample grid and keep the "SAMPLE DATA" ban
 - **Person 1:** demo video, plus the README sections for the problem, how it works, and setup.
 - **Person 2:** README sections for data sources (with links), scores and formulas, and limitations (surface vs. air temperature, one summer day, spring leaf-off imagery, demo area only).
 - **Person 3:** README sections for architecture, environment variables, and "How we used Kiro."
+
+## Demo script (2 minutes, built to win)
+
+1. **The problem (15 s).** On June 25, 2024, Landsat measured the ground around Chinatown at about 109°F, versus about 102°F in West Roxbury. That's an 8°F gap across one city on one day. But nobody can read a satellite thermal image, and renters especially don't know what help exists.
+2. **Chinatown (40 s).** Type the demo address. Show:
+   - the aerial photo of the block
+   - the heat score: the ground got hotter than most of Boston on June 25, 2024. Point at the "ground, not air" label.
+   - low green cover
+   - the live cards: today's NWS weather, AQI, the FEMA zone plus future flooding at 21 inches of sea level rise, nearby street trees with **empty planting spots** (near 50 Hudson St: 23 trees, 4 empty spots), and the nearest community center (Quincy, 0.3 mi)
+3. **Renter → owner (20 s).** Flip the toggle. The plan changes: renters get cooling centers, tree requests, and community solar; owners also get heat pumps and rooftop solar. Every action links to a real, verified Massachusetts program.
+4. **West Roxbury (20 s).** Cooler ground, much greener, a different plan. Same honesty labels.
+5. **Why trust it (15 s).**
+   - Scores come from our own satellite pipeline, and every source and date is shown.
+   - The AI can only cite verified programs and facts we fetched. Invented phone numbers or dollar amounts get rejected automatically.
+   - Out-of-area addresses get "coverage coming soon," never a fake score.
+6. **Boston is getting hotter (10 s).** 13 days of 90°F+ in summer 2026, against about 8.5 a year in 1991-2020. Climate models project a median of about 14 a year for 2031-2050. That's why this matters.
+
+**If something fails live:** live cards hide themselves, and the action plan falls back to the rules version. Set `LIVE_DATA_ENABLED=false` for a fully offline run.
+
+## Write-up drafts (finish in the final hour)
+
+### Architecture
+
+```
+Offline (Python, pipeline/)                    Online (Next.js, app/ + lib/)
+Landsat 9 ST_B10 ─┐                            Browser ──► /api/geocode  ─► Census → Nominatim
+MassGIS 2025 NIR ─┴► 100 m grid ─► data/scores ─► /api/score, /api/grid
+                                                       ──► /api/live    ─► NWS, Open-Meteo, FEMA,
+data/programs (verified) ─────────────────────────►        Climate Ready Boston, Analyze Boston
+                                                       ──► /api/action-plan ─► Claude (forced JSON)
+                                                                              └► validator ─► rules fallback
+```
+
+- Scores come only from the pipeline files. Live data adds context and never changes a score.
+- Every external call runs server-side, with timeouts and an in-memory cache. A failing source hides its card instead of breaking the page.
+- The AI writes only the plan text. It must cite a verified program `id`. Links come from our records, and any phone number, dollar amount, email, or URL not found in our data gets the plan rejected.
+
+### Environment variables
+
+| Variable | Needed? | What it does |
+|---|---|---|
+| `ANTHROPIC_API_KEY` | For the AI plan | Without it, the rules plan is used |
+| `CLAUDE_MODEL` | No | Default `claude-haiku-5-5` |
+| `GEOCODER_PROVIDER` | No | `census` (default, with Nominatim fallback) or `nominatim` |
+| `GEOCODER_USER_AGENT` | Recommended | Identifies us to Nominatim and NWS, as their usage policies require |
+| `NEXT_PUBLIC_BASEMAP_TILE_URL` | No | MassGIS 2025 aerial tiles by default |
+| `LIVE_DATA_ENABLED` | No | `false` turns off all live API calls |
+| `ALLOW_UNVERIFIED_PROGRAMS` | Dev only | Shows programs whose `last_verified` is null |
+| `SCORES_DIR` | Testing only | Points the app at a different score grid |
+| `GOOGLE_SOLAR_API_KEY` | Stretch | Solar card |
+
+### How we used Kiro
+
+- **Steering** (`.kiro/steering/`): `product.md` holds the honesty rules and the 8th-grade reading level, `data.md` the formulas, CRS handling, and live data rules, `tech.md` the stack and conventions, and `structure.md` the ownership map. Every Kiro request on the team followed them.
+- **Spec** (`.kiro/specs/climatecheck-mvp/`): requirements in WHEN/SHALL form, a design with every API contract and the prompt/output schema, and tasks numbered to match the `TODO (task X.Y)` comments in the code.
+- **Hooks** (`.kiro/hooks/`): saving or creating a file in `data/scores/` runs the schema validator, so SAMPLE data can never be marked real.
+- **Agents:** Kiro scaffolded the repo, picked and downloaded the cloud-free Landsat scene by checking cloud cover over each neighborhood, tested every public API against Boston addresses before we built on it, audited the merged frontend against the honesty rules, and resolved our merge conflict.
 
 ## Handoffs between people
 

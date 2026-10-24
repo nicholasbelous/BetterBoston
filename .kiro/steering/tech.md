@@ -32,7 +32,17 @@ npm run lint
 npm run typecheck
 npm run sample:data    # writes SAMPLE score files (pipeline/make_sample_data.py)
 npm run validate:data  # checks data/scores (pipeline/validate_scores.py)
+npm run check:programs # fetches each program link and checks its facts appear on the page
+npm run build:climate  # rebuilds data/live/climate_boston.json from Open-Meteo (takes ~2 min)
 ```
+
+## Live data conventions
+
+- One module per source in `lib/live/<id>.ts`, returning `LiveResult<T>`. Register it in `lib/live/index.ts`.
+- Use `fetchJson` (timeout + User-Agent) and `cached` (TTL + in-flight de-duplication) from `lib/live/http.ts`. Use `arcgisPointQuery` / `arcgisPointHit` for ArcGIS layers.
+- A source must never throw out of `getLiveSource`. Failures become `{ ok: false }`.
+- Heavy or rate-limited data (long climate series) is prebuilt into `data/live/` by a script, not fetched per request.
+- `LIVE_DATA_ENABLED=false` turns off every live call.
 
 ## Testing an API route by hand
 
@@ -41,6 +51,9 @@ curl "localhost:3000/api/geocode?q=50+Hudson+St+Boston"
 curl "localhost:3000/api/score?lat=42.3498&lng=-71.0603"
 curl -X POST localhost:3000/api/action-plan -H "Content-Type: application/json" \
   -d '{"cell_id":"<id>","tenure":"renter"}'
+curl "localhost:3000/api/grid"
+curl "localhost:3000/api/live?lat=42.3498&lng=-71.0603"
+curl "localhost:3000/api/live/flood?lat=42.3498&lng=-71.0603"
 ```
 
 `SCORES_DIR` can point the app at a test grid, and `ALLOW_UNVERIFIED_PROGRAMS=true` shows unverified programs. Both are for local development only.

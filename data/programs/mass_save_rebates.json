@@ -9,11 +9,7 @@
       "link": "https://www.boston.gov/departments/environment/community-first-partnership",
       "audience": ["renter", "owner"],
       "topics": ["energy", "heat"],
-      "last_verified": null,
-      "details": {
-        "phone": "866-527-SAVE",
-        "format": "In-person or virtual"
-      }
+      "last_verified": null
     },
     {
       "id": "mass-save-income-eligible",
