@@ -1,10 +1,10 @@
 {
   "schema_version": 1,
-  "is_sample": true,
-  "generated_at": "2026-10-24T18:20:16Z",
-  "generated_by": "pipeline/make_sample_data.py",
+  "is_sample": false,
+  "generated_at": "2026-10-24T20:42:27Z",
+  "generated_by": "pipeline/build_grid.py",
   "area": {
-    "name": "Boston demo areas (SAMPLE)",
+    "name": "Boston demo areas",
     "neighborhoods": [
       "Chinatown",
       "West Roxbury",
@@ -21,29 +21,43 @@
     "cell_size_m": 100,
     "processing_crs": "EPSG:26919",
     "output_crs": "EPSG:4326",
-    "cell_count": 944
+    "cell_count": 976
   },
   "heat": {
-    "source": "SAMPLE (synthetic, not Landsat)",
-    "scene_id": "SAMPLE",
-    "scene_date": "SAMPLE",
-    "reference_area": "All SAMPLE cells (Chinatown, West Roxbury, East Boston)",
-    "reference_mean_f": 90.9,
+    "source": "Landsat 8/9 Collection 2 Level-2 surface temperature (USGS, via Microsoft Planetary Computer)",
+    "scene_id": "LC09_L2SP_012031_20240625_02_T1",
+    "scene_date": "2024-06-25",
+    "reference_area": "City of Boston",
+    "reference_mean_f": 104.9,
     "min_valid_frac": 0.5
   },
   "tree": {
-    "source": "SAMPLE (synthetic, not MassGIS imagery)",
-    "imagery_dates": "SAMPLE",
+    "source": "Landsat 8/9 Collection 2 Level-2 surface reflectance, NDVI (same scene)",
+    "imagery_dates": "2024-06-25",
     "ndvi_threshold": 0.3,
     "leaf_off": false,
-    "reference_area": "All SAMPLE cells (Chinatown, West Roxbury, East Boston)",
+    "reference_area": "City of Boston",
     "min_valid_frac": 0.5
   },
-  "sources": [],
+  "sources": [
+    {
+      "name": "Microsoft Planetary Computer: Landsat Collection 2 Level-2",
+      "url": "https://planetarycomputer.microsoft.com/dataset/landsat-c2-l2"
+    },
+    {
+      "name": "USGS Landsat Collection 2",
+      "url": "https://www.usgs.gov/landsat-missions/landsat-collection-2"
+    },
+    {
+      "name": "U.S. Census Bureau Cartographic Boundary Files",
+      "url": "https://www.census.gov/geographies/mapping-files/time-series/geo/cartographic-boundary.html"
+    }
+  ],
   "notes": [
-    "SAMPLE DATA — not real measurements",
-    "Generated with a fixed random seed (20261024); values are synthetic.",
-    "About 5% of cells have valid_frac below min_valid_frac and null scores, to exercise the UI's no-data handling.",
-    "ndvi_threshold is a placeholder; no NDVI was computed."
+    "Surface temperature, not air temperature",
+    "Single summer day: 2024-06-25",
+    "Landsat thermal native resolution is 100 m (delivered at 30 m)",
+    "30 m pixels mix trees and pavement",
+    "Scores are percentile ranks across all City of Boston cells"
   ]
 }
