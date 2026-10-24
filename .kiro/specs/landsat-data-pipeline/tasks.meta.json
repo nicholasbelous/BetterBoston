@@ -31,6 +31,10 @@
     "3.9 Write property test for apply_min_valid in `pipeline/tests/test_scoring.py`": {
       "status": "passed",
       "lastRunTimestamp": 1792872778173
+    },
+    "3.10 Write property test for clear fraction and median temperature in `pipeline/tests/test_scoring.py`": {
+      "status": "passed",
+      "lastRunTimestamp": 1792872848183
     }
   },
   "executionHistory": {
@@ -209,6 +213,25 @@
         "executionId": "2891560a-37e5-4298-a11f-bf53591858c0",
         "chatSessionId": "sess_cd1d99e7-5111-4cb8-a2cf-76ee93aa21a2",
         "timestamp": 1792872787174
+      },
+      {
+        "executionId": "2891560a-37e5-4298-a11f-bf53591858c0",
+        "chatSessionId": "sess_cd1d99e7-5111-4cb8-a2cf-76ee93aa21a2",
+        "timestamp": 1792872858292
+      }
+    ],
+    "3. Implement the scoring module and its tests": [
+      {
+        "executionId": "2891560a-37e5-4298-a11f-bf53591858c0",
+        "chatSessionId": "sess_cd1d99e7-5111-4cb8-a2cf-76ee93aa21a2",
+        "timestamp": 1792872858428
+      }
+    ],
+    "4.1 Add raster functions to `pipeline/raster_io.py`": [
+      {
+        "executionId": "c3929e28-50ec-41bf-a37f-cefbd85af605",
+        "chatSessionId": "sess_8a82e19c-cb01-4505-911b-5d8e0d992619",
+        "timestamp": 1792872912890
       }
     ]
   }

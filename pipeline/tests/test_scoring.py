@@ -450,3 +450,95 @@ def test_apply_min_valid_inclusive_threshold(score, valid_frac):
         assert out is score
     else:
         assert out is None
+
+
+# ---------------------------------------------------------------------------
+# Property 11: clear_fraction and median_valid_f use only valid Boston pixels
+# ---------------------------------------------------------------------------
+
+_BAD_BIT_POSITIONS = (0, 1, 3, 4, 7)
+
+# QA values guaranteed to have at least one bad bit set.
+_bad_qa_values = st.tuples(
+    st.integers(min_value=0, max_value=65535),
+    st.sampled_from(_BAD_BIT_POSITIONS),
+).map(lambda t: t[0] | (1 << t[1]))
+
+
+@st.composite
+def _boston_pixel_inputs(draw):
+    """Same-shape 2-D ``qa``, ``lwir``, ``inside`` (<= 32x32), inside has a True.
+
+    Kinds:
+    - ``random``: arbitrary QA, DN, and inside masks.
+    - ``all_bad_qa``: every QA value has a bad bit, so no valid heat pixels.
+    - ``all_lwir_zero``: every DN is fill, so no valid heat pixels.
+    - ``outside_only``: valid heat pixels exist only outside Boston.
+    """
+    shape = draw(
+        st.tuples(
+            st.integers(min_value=1, max_value=32),
+            st.integers(min_value=1, max_value=32),
+        )
+    )
+    kind = draw(st.sampled_from(["random", "all_bad_qa", "all_lwir_zero", "outside_only"]))
+
+    qa_elements = _bad_qa_values if kind == "all_bad_qa" else _qa_values
+    qa = draw(hnp.arrays(np.uint16, shape, elements=qa_elements))
+    if kind == "all_lwir_zero":
+        lwir = np.zeros(shape, dtype=np.uint16)
+    else:
+        lwir = draw(hnp.arrays(np.uint16, shape, elements=_dn_values))
+
+    row = draw(st.integers(min_value=0, max_value=shape[0] - 1))
+    col = draw(st.integers(min_value=0, max_value=shape[1] - 1))
+
+    if kind == "outside_only":
+        # Make the forced-inside pixel invalid, then put inside only on
+        # pixels that are not Valid_Heat_Pixels.
+        lwir[row, col] = 0
+        bad = (qa.astype(np.uint32) & 0b10011011) != 0
+        valid_anywhere = (lwir != 0) & ~bad
+        inside = ~valid_anywhere
+    else:
+        inside = draw(hnp.arrays(np.bool_, shape))
+    inside[row, col] = True
+    return kind, qa, lwir, inside
+
+
+# Feature: landsat-data-pipeline, Property 11: Clear fraction and median temperature use only valid Boston pixels
+@given(inputs=_boston_pixel_inputs())
+def test_clear_fraction_and_median_use_only_valid_boston_pixels(inputs):
+    """**Validates: Requirements 5.5, 5.6, 6.5**"""
+    kind, qa, lwir, inside = inputs
+
+    # Bad-bit test and degrees F computed independently of scoring.py.
+    bad = (qa.astype(np.uint32) & 0b10011011) != 0
+    n_inside = int(np.count_nonzero(inside))
+    assert n_inside >= 1
+
+    # clear_fraction: share of inside pixels with no bad QA bit.
+    expected_frac = int(np.count_nonzero(inside & ~bad)) / n_inside
+    frac = scoring.clear_fraction(qa, inside)
+    assert isinstance(frac, float)
+    assert frac == expected_frac
+    assert 0.0 <= frac <= 1.0
+
+    # median_valid_f: median degrees F over Valid_Heat_Pixels only.
+    valid = inside & (lwir != 0) & ~bad
+    median = scoring.median_valid_f(lwir, qa, inside)
+
+    if kind in ("all_bad_qa", "all_lwir_zero", "outside_only"):
+        # These generators never produce a Valid_Heat_Pixel.
+        assert not np.any(valid)
+
+    if not np.any(valid):
+        assert median is None
+        return
+
+    d = lwir[valid].astype(np.float64)
+    temps_f = ((d * 0.00341802 + 149.0) - 273.15) * 9.0 / 5.0 + 32.0
+    expected_median = float(np.median(temps_f))
+
+    assert type(median) is float
+    assert math.isclose(median, expected_median, rel_tol=0.0, abs_tol=1e-9)

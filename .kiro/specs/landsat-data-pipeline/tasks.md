@@ -50,7 +50,7 @@ Build the pipeline as small Python 3 scripts in `pipeline/`, in the order set by
     - Mocked downloads: 404 falls back to GENZ2022; other error exits 1 and keeps the existing file; no Boston feature exits 1; local zip fixture is saved in EPSG:4326
     - _Requirements: 3.2, 3.4, 3.5, 3.6_
 
-- [~] 3. Implement the scoring module and its tests
+- [x] 3. Implement the scoring module and its tests
   - [x] 3.1 Create `pipeline/scoring.py`
     - `QA_BAD_BITS = 0b10011011`; `dn_to_fahrenheit`, `dn_to_reflectance`, `ndvi`, `qa_mask`, `clear_fraction`, `median_valid_f`, `percentile_rank`, `apply_min_valid` as specified in the design
     - Pure numpy, no I/O, inputs never modified; Python `round` (half to even) in `percentile_rank`; 50 for a single value; all-NaN for empty or all-NaN input
@@ -89,7 +89,7 @@ Build the pipeline as small Python 3 scripts in `pipeline/`, in the order set by
     - **Property 10: apply_min_valid uses an inclusive threshold**
     - **Validates: Requirements 4.13, 4.15**
 
-  - [-] 3.10 Write property test for clear fraction and median temperature in `pipeline/tests/test_scoring.py`
+  - [x] 3.10 Write property test for clear fraction and median temperature in `pipeline/tests/test_scoring.py`
     - **Property 11: Clear fraction and median temperature use only valid Boston pixels**
     - **Validates: Requirements 5.5, 5.6, 6.5**
 
@@ -97,8 +97,8 @@ Build the pipeline as small Python 3 scripts in `pipeline/`, in the order set by
     - `[1, 2, 3]` → `[0, 50, 100]`; `[1, 1, 2]` → `[25, 25, 100]`; single value → 50; empty → empty; `apply_min_valid` at exactly 0.5
     - _Requirements: 4.7, 4.8, 4.13, 4.16_
 
-- [ ] 4. Implement raster helpers and the Landsat fetcher
-  - [ ] 4.1 Add raster functions to `pipeline/raster_io.py`
+- [~] 4. Implement raster helpers and the Landsat fetcher
+  - [-] 4.1 Add raster functions to `pipeline/raster_io.py`
     - `Band` dataclass, `WindowError`, `window_read` (transform_bounds, from_bounds, round, intersect, reject empty window), `open_band`, `check_alignment`, `load_boundary`, `inside_mask` (`geometry_mask`, `all_touched=False`), `write_band` (same dtype/CRS/transform/nodata, DEFLATE, temp file + `os.replace`)
     - `window_read` is the only source-pixel read path; wrap remote reads in `rasterio.Env(GDAL_DISABLE_READDIR_ON_OPEN="EMPTY_DIR")`
     - _Requirements: 5.11, 6.2, 6.3, 6.10, 6.11, 6.13, 7.1, 7.9_
