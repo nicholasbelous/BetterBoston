@@ -3,6 +3,34 @@
     "3.2 Write property test for DN conversions in `pipeline/tests/test_scoring.py`": {
       "status": "passed",
       "lastRunTimestamp": 1792871894941
+    },
+    "3.3 Write property test for NDVI in `pipeline/tests/test_scoring.py`": {
+      "status": "passed",
+      "lastRunTimestamp": 1792872058623
+    },
+    "3.4 Write property test for QA mask in `pipeline/tests/test_scoring.py`": {
+      "status": "passed",
+      "lastRunTimestamp": 1792872333932
+    },
+    "3.5 Write property test for percentile_rank vs sample data in `pipeline/tests/test_scoring.py`": {
+      "status": "passed",
+      "lastRunTimestamp": 1792872435559
+    },
+    "3.6 Write property test for percentile_rank bounds and monotonicity in `pipeline/tests/test_scoring.py`": {
+      "status": "passed",
+      "lastRunTimestamp": 1792872540638
+    },
+    "3.7 Write property test for NaN handling in `pipeline/tests/test_scoring.py`": {
+      "status": "passed",
+      "lastRunTimestamp": 1792872631479
+    },
+    "3.8 Write property test for input immutability in `pipeline/tests/test_scoring.py`": {
+      "status": "passed",
+      "lastRunTimestamp": 1792872710838
+    },
+    "3.9 Write property test for apply_min_valid in `pipeline/tests/test_scoring.py`": {
+      "status": "passed",
+      "lastRunTimestamp": 1792872778173
     }
   },
   "executionHistory": {
@@ -85,6 +113,102 @@
         "executionId": "2891560a-37e5-4298-a11f-bf53591858c0",
         "chatSessionId": "sess_cd1d99e7-5111-4cb8-a2cf-76ee93aa21a2",
         "timestamp": 1792871852361
+      },
+      {
+        "executionId": "2891560a-37e5-4298-a11f-bf53591858c0",
+        "chatSessionId": "sess_cd1d99e7-5111-4cb8-a2cf-76ee93aa21a2",
+        "timestamp": 1792871904268
+      }
+    ],
+    "3.3 Write property test for NDVI in `pipeline/tests/test_scoring.py`": [
+      {
+        "executionId": "2891560a-37e5-4298-a11f-bf53591858c0",
+        "chatSessionId": "sess_cd1d99e7-5111-4cb8-a2cf-76ee93aa21a2",
+        "timestamp": 1792871904926
+      },
+      {
+        "executionId": "2891560a-37e5-4298-a11f-bf53591858c0",
+        "chatSessionId": "sess_cd1d99e7-5111-4cb8-a2cf-76ee93aa21a2",
+        "timestamp": 1792872067560
+      }
+    ],
+    "3.4 Write property test for QA mask in `pipeline/tests/test_scoring.py`": [
+      {
+        "executionId": "2891560a-37e5-4298-a11f-bf53591858c0",
+        "chatSessionId": "sess_cd1d99e7-5111-4cb8-a2cf-76ee93aa21a2",
+        "timestamp": 1792872068613
+      },
+      {
+        "executionId": "2891560a-37e5-4298-a11f-bf53591858c0",
+        "chatSessionId": "sess_cd1d99e7-5111-4cb8-a2cf-76ee93aa21a2",
+        "timestamp": 1792872342041
+      }
+    ],
+    "3.5 Write property test for percentile_rank vs sample data in `pipeline/tests/test_scoring.py`": [
+      {
+        "executionId": "2891560a-37e5-4298-a11f-bf53591858c0",
+        "chatSessionId": "sess_cd1d99e7-5111-4cb8-a2cf-76ee93aa21a2",
+        "timestamp": 1792872343092
+      },
+      {
+        "executionId": "2891560a-37e5-4298-a11f-bf53591858c0",
+        "chatSessionId": "sess_cd1d99e7-5111-4cb8-a2cf-76ee93aa21a2",
+        "timestamp": 1792872447994
+      }
+    ],
+    "3.6 Write property test for percentile_rank bounds and monotonicity in `pipeline/tests/test_scoring.py`": [
+      {
+        "executionId": "2891560a-37e5-4298-a11f-bf53591858c0",
+        "chatSessionId": "sess_cd1d99e7-5111-4cb8-a2cf-76ee93aa21a2",
+        "timestamp": 1792872448626
+      },
+      {
+        "executionId": "2891560a-37e5-4298-a11f-bf53591858c0",
+        "chatSessionId": "sess_cd1d99e7-5111-4cb8-a2cf-76ee93aa21a2",
+        "timestamp": 1792872549915
+      }
+    ],
+    "3.7 Write property test for NaN handling in `pipeline/tests/test_scoring.py`": [
+      {
+        "executionId": "2891560a-37e5-4298-a11f-bf53591858c0",
+        "chatSessionId": "sess_cd1d99e7-5111-4cb8-a2cf-76ee93aa21a2",
+        "timestamp": 1792872550729
+      },
+      {
+        "executionId": "2891560a-37e5-4298-a11f-bf53591858c0",
+        "chatSessionId": "sess_cd1d99e7-5111-4cb8-a2cf-76ee93aa21a2",
+        "timestamp": 1792872641670
+      }
+    ],
+    "3.8 Write property test for input immutability in `pipeline/tests/test_scoring.py`": [
+      {
+        "executionId": "2891560a-37e5-4298-a11f-bf53591858c0",
+        "chatSessionId": "sess_cd1d99e7-5111-4cb8-a2cf-76ee93aa21a2",
+        "timestamp": 1792872642433
+      },
+      {
+        "executionId": "2891560a-37e5-4298-a11f-bf53591858c0",
+        "chatSessionId": "sess_cd1d99e7-5111-4cb8-a2cf-76ee93aa21a2",
+        "timestamp": 1792872721412
+      }
+    ],
+    "3.9 Write property test for apply_min_valid in `pipeline/tests/test_scoring.py`": [
+      {
+        "executionId": "2891560a-37e5-4298-a11f-bf53591858c0",
+        "chatSessionId": "sess_cd1d99e7-5111-4cb8-a2cf-76ee93aa21a2",
+        "timestamp": 1792872722421
+      },
+      {
+        "executionId": "2891560a-37e5-4298-a11f-bf53591858c0",
+        "chatSessionId": "sess_cd1d99e7-5111-4cb8-a2cf-76ee93aa21a2",
+        "timestamp": 1792872788109
+      }
+    ],
+    "3.10 Write property test for clear fraction and median temperature in `pipeline/tests/test_scoring.py`": [
+      {
+        "executionId": "2891560a-37e5-4298-a11f-bf53591858c0",
+        "chatSessionId": "sess_cd1d99e7-5111-4cb8-a2cf-76ee93aa21a2",
+        "timestamp": 1792872787174
       }
     ]
   }

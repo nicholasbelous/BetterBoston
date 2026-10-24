@@ -56,40 +56,40 @@ Build the pipeline as small Python 3 scripts in `pipeline/`, in the order set by
     - Pure numpy, no I/O, inputs never modified; Python `round` (half to even) in `percentile_rank`; 50 for a single value; all-NaN for empty or all-NaN input
     - _Requirements: 4.1, 4.2, 4.3, 4.4, 4.5, 4.6, 4.7, 4.8, 4.9, 4.13, 4.15, 4.16, 5.5, 5.6, 6.5_
 
-  - [-] 3.2 Write property test for DN conversions in `pipeline/tests/test_scoring.py`
+  - [x] 3.2 Write property test for DN conversions in `pipeline/tests/test_scoring.py`
     - **Property 3: DN conversions match the Collection 2 formulas**
     - **Validates: Requirements 4.2, 4.3**
 
-  - [ ] 3.3 Write property test for NDVI in `pipeline/tests/test_scoring.py`
+  - [x] 3.3 Write property test for NDVI in `pipeline/tests/test_scoring.py`
     - **Property 4: NDVI is float32, clipped, and NaN where undefined**
     - **Validates: Requirements 4.4, 4.5, 4.11**
 
-  - [ ] 3.4 Write property test for QA mask in `pipeline/tests/test_scoring.py`
+  - [x] 3.4 Write property test for QA mask in `pipeline/tests/test_scoring.py`
     - **Property 5: QA mask is the bit test**
     - **Validates: Requirements 4.6, 4.12**
 
-  - [ ] 3.5 Write property test for percentile_rank vs sample data in `pipeline/tests/test_scoring.py`
+  - [x] 3.5 Write property test for percentile_rank vs sample data in `pipeline/tests/test_scoring.py`
     - **Property 6: percentile_rank matches the sample-data reference**
     - Compare against `make_sample_data.percentile_scores`
     - **Validates: Requirements 4.7, 4.8**
 
-  - [ ] 3.6 Write property test for percentile_rank bounds and monotonicity in `pipeline/tests/test_scoring.py`
+  - [x] 3.6 Write property test for percentile_rank bounds and monotonicity in `pipeline/tests/test_scoring.py`
     - **Property 7: percentile_rank is bounded, tie-consistent, and monotone**
     - **Validates: Requirements 4.10**
 
-  - [ ] 3.7 Write property test for NaN handling in `pipeline/tests/test_scoring.py`
+  - [x] 3.7 Write property test for NaN handling in `pipeline/tests/test_scoring.py`
     - **Property 8: NaN inputs do not affect percentile_rank**
     - **Validates: Requirements 4.9, 4.16**
 
-  - [ ] 3.8 Write property test for input immutability in `pipeline/tests/test_scoring.py`
+  - [x] 3.8 Write property test for input immutability in `pipeline/tests/test_scoring.py`
     - **Property 9: Scoring functions do not modify their inputs**
     - **Validates: Requirements 4.1**
 
-  - [ ] 3.9 Write property test for apply_min_valid in `pipeline/tests/test_scoring.py`
+  - [x] 3.9 Write property test for apply_min_valid in `pipeline/tests/test_scoring.py`
     - **Property 10: apply_min_valid uses an inclusive threshold**
     - **Validates: Requirements 4.13, 4.15**
 
-  - [ ] 3.10 Write property test for clear fraction and median temperature in `pipeline/tests/test_scoring.py`
+  - [-] 3.10 Write property test for clear fraction and median temperature in `pipeline/tests/test_scoring.py`
     - **Property 11: Clear fraction and median temperature use only valid Boston pixels**
     - **Validates: Requirements 5.5, 5.6, 6.5**
 

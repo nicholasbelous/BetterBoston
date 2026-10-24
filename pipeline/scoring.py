@@ -59,12 +59,14 @@ def ndvi(red: np.ndarray, nir: np.ndarray) -> np.ndarray:
         value = np.where(undefined, np.nan, value)
         # np.clip passes NaN through; +/-1 are exact in float32.
         value = np.clip(value, -1.0, 1.0)
-    return value.astype(np.float32)
+    # np.asarray keeps 0-D input as a 0-D ndarray instead of a numpy scalar.
+    return np.asarray(value, dtype=np.float32)
 
 
 def qa_mask(qa: np.ndarray) -> np.ndarray:
     """Bad-pixel mask from QA_PIXEL: True where any of bits 0, 1, 3, 4, 7 is set."""
-    return (np.asarray(qa).astype(np.uint16) & QA_BAD_BITS) != 0
+    # np.asarray keeps 0-D input as a 0-D ndarray instead of a numpy scalar.
+    return np.asarray((np.asarray(qa).astype(np.uint16) & QA_BAD_BITS) != 0)
 
 
 def clear_fraction(qa: np.ndarray, inside: np.ndarray) -> float:
