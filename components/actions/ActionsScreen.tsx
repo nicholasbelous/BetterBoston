@@ -123,7 +123,11 @@ export default function ActionsScreen({ initial }: { initial: LocationContext })
       <div className="mb-4">
         <SampleDataBanner
           show={data?.isSample ?? true}
-          note="The actions below are general placeholder ideas, not verified programs."
+          note={
+            apiPlan
+              ? "The programs below are real and checked. The block numbers in the summary are sample data."
+              : "The actions below are general placeholder ideas, not verified programs."
+          }
         />
       </div>
 
