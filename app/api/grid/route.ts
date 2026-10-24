@@ -1,7 +1,7 @@
 // GET /api/grid
 // 200 GridResponse: every score cell (trimmed properties) + score metadata, for coloring the map
 // 503 score files missing
-// Contract: .kiro/specs/climatecheck-mvp/design.md ("API routes")
+// Contract: .kiro/specs/betterboston-mvp/design.md ("API routes")
 import { getGrid } from "@/lib/scores";
 import type { ApiError } from "@/lib/types";
 

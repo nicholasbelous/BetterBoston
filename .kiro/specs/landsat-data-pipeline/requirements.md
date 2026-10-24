@@ -2,7 +2,7 @@
 
 ## Introduction
 
-The Landsat Data Pipeline replaces the SAMPLE score data in `data/scores/` with real measurements for ClimateCheck MA. It uses one clear Landsat 8 or 9 Collection 2 Level-2 summer scene on Microsoft Planetary Computer (the Default_Scene unless the optional Scene_Finder selects another), reads only a window around Boston, and computes per-cell surface temperature and NDVI green cover on a 100 m grid in EPSG:26919. Scores are percentile ranks across all City of Boston cells. Only cells in the three demo neighborhoods are written.
+The Landsat Data Pipeline replaces the SAMPLE score data in `data/scores/` with real measurements for BetterBoston. It uses one clear Landsat 8 or 9 Collection 2 Level-2 summer scene on Microsoft Planetary Computer (the Default_Scene unless the optional Scene_Finder selects another), reads only a window around Boston, and computes per-cell surface temperature and NDVI green cover on a 100 m grid in EPSG:26919. Scores are percentile ranks across all City of Boston cells. Only cells in the three demo neighborhoods are written.
 
 The output files (`data/scores/demo_grid.geojson` and `data/scores/demo_grid.meta.json`) must match `ScoreGrid`, `ScoreCellProperties`, and `ScoreMetadata` in `lib/types.ts` exactly and must pass the existing `pipeline/validate_scores.py`, which rejects any property not in `lib/types.ts`.
 

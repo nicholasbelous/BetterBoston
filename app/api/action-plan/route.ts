@@ -4,7 +4,7 @@
 // the prompt always uses pipeline output, never client-supplied numbers.
 // If Claude is unavailable or its answer fails validation, a rule-based plan
 // is returned instead (ActionPlan.source = "rules"), so the demo never breaks.
-// Contract: .kiro/specs/climatecheck-mvp/design.md ("API routes", "Action plan prompt")
+// Contract: .kiro/specs/betterboston-mvp/design.md ("API routes", "Action plan prompt")
 import { z } from "zod";
 import {
   ACTION_PLAN_TOOL_DESCRIPTION,

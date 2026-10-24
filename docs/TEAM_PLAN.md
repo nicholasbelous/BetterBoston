@@ -1,4 +1,4 @@
-# [PROJECT_NAME] (working name: ClimateCheck MA)
+# BetterBoston
 
 Type a Massachusetts address and get a plain-English climate report for your block: how hot the ground gets on a summer day, how green the block is, live weather, air, and flood information for that spot, and an action plan built only from real Massachusetts programs.
 
@@ -61,7 +61,7 @@ If you see `"/map" does not satisfy the constraint 'AppRoutes'`, run `npx next t
 - **Leaf-off imagery:** the MassGIS 2025 photos were taken March 18 to April 23, 2025, before leaf-out. The score is called **"green cover"**, not "tree canopy," and the About page explains why.
 - **Heat scene:** Landsat 9, June 25, 2024 (`LC09_L2SP_012031_20240625_02_T1`), under 1% cloud over Boston.
 - **AI provider:** Anthropic API (Claude Haiku), not AWS Bedrock.
-- **Still open:** the final project name. Replace every `[PROJECT_NAME]` and `APP_NAME` in `lib/config.ts`.
+- **Decided:** the project name is BetterBoston (`APP_NAME` in `lib/config.ts`).
 
 ## Who does what
 
@@ -316,7 +316,7 @@ data/programs (verified) ──────────────────�
 ### How we used Kiro
 
 - **Steering** (`.kiro/steering/`): `product.md` holds the honesty rules and the 8th-grade reading level, `data.md` the formulas, CRS handling, and live data rules, `tech.md` the stack and conventions, and `structure.md` the ownership map. Every Kiro request on the team followed them.
-- **Spec** (`.kiro/specs/climatecheck-mvp/`): requirements in WHEN/SHALL form, a design with every API contract and the prompt/output schema, and tasks numbered to match the `TODO (task X.Y)` comments in the code.
+- **Spec** (`.kiro/specs/betterboston-mvp/`): requirements in WHEN/SHALL form, a design with every API contract and the prompt/output schema, and tasks numbered to match the `TODO (task X.Y)` comments in the code.
 - **Hooks** (`.kiro/hooks/`): saving or creating a file in `data/scores/` runs the schema validator, so SAMPLE data can never be marked real.
 - **Agents:** Kiro scaffolded the repo, picked and downloaded the cloud-free Landsat scene by checking cloud cover over each neighborhood, tested every public API against Boston addresses before we built on it, audited the merged frontend against the honesty rules, and resolved our merge conflict.
 

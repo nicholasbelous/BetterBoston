@@ -1,4 +1,4 @@
-# Requirements: ClimateCheck MA MVP
+# Requirements: BetterBoston MVP
 
 ## Introduction
 

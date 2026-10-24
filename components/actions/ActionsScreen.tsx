@@ -91,7 +91,7 @@ export default function ActionsScreen({ initial }: { initial: LocationContext })
 
   async function copyPlan() {
     const lines = [
-      `ClimateCheck MA action ideas for ${title}`,
+      `BetterBoston action ideas for ${title}`,
       "(placeholder ideas, not verified programs)",
       "",
       ...placeholders.map((a, i) => `${i + 1}. ${a.title} - ${a.summary}${done.has(a.id) ? " [done]" : ""}`),

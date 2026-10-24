@@ -31,7 +31,7 @@ const TABS: TabItem<TabId>[] = [
   { id: "recs", label: "Recommendations" },
 ];
 
-const SAVED_KEY = "climatecheck:saved";
+const SAVED_KEY = "betterboston:saved";
 
 function readSaved(raw: string | null): string[] {
   if (!raw) return [];
@@ -122,7 +122,7 @@ export default function ReportScreen({ initial }: { initial: LocationContext }) 
     const url = window.location.href;
     if (typeof navigator.share === "function") {
       try {
-        await navigator.share({ title: `${title} | ClimateCheck MA`, url });
+        await navigator.share({ title: `${title} | BetterBoston`, url });
         return;
       } catch (err) {
         if (err instanceof DOMException && err.name === "AbortError") return;

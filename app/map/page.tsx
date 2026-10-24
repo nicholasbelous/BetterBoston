@@ -3,7 +3,7 @@ import type { Metadata } from "next";
 import MapScreen from "@/components/map/MapScreen";
 import { parseLocation, recordGetter } from "@/services/locationContext";
 
-export const metadata: Metadata = { title: "Climate map | ClimateCheck MA" };
+export const metadata: Metadata = { title: "Climate map | BetterBoston" };
 
 export default async function MapPage({ searchParams }: PageProps<"/map">) {
   const ctx = parseLocation(recordGetter(await searchParams));

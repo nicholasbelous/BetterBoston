@@ -5,7 +5,7 @@ import type { Metadata } from "next";
 import ReportScreen from "@/components/report/ReportScreen";
 import { parseLocation, recordGetter } from "@/services/locationContext";
 
-export const metadata: Metadata = { title: "Home analysis | ClimateCheck MA" };
+export const metadata: Metadata = { title: "Home analysis | BetterBoston" };
 
 export default async function ReportPage({ searchParams }: PageProps<"/report">) {
   const ctx = parseLocation(recordGetter(await searchParams));

@@ -8,7 +8,7 @@ import "./globals.css";
 
 // System fonts only: no network fetch at build time (hackathon wifi).
 export const metadata: Metadata = {
-  title: "ClimateCheck MA",
+  title: "BetterBoston",
   description:
     "A plain-language climate report for your Boston block, from satellite and aerial imagery.",
 };

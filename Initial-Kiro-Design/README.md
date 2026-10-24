@@ -1,4 +1,4 @@
-# [PROJECT_NAME] — Climate report card for Massachusetts homes
+# BetterBoston — Climate report card for Massachusetts homes
 
 A resident types their address and gets a climate report for their block: how hot it gets in summer,
 how much tree cover it has, and a short action plan using real Massachusetts programs.
@@ -141,7 +141,7 @@ so the frontend never needs the backend's address.
 
 ## Before the demo: checklist
 
-- [ ] Replace every `[PROJECT_NAME]` (search the whole project: **Ctrl/Cmd + Shift + F**).
+- [x] Replace every `BetterBoston` (now BetterBoston).
 - [ ] Check each program in `programs.json`: put the exact program page in `url` and set `"verified": true`.
       Right now most links go to the agency's home page, and two have no link yet.
 - [ ] Fill in the cool-roof savings tag (`"Est. savings: [$ per year]"`) or change it to "Rebate available".

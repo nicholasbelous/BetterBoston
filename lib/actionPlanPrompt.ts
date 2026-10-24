@@ -1,5 +1,5 @@
 // Builds the system + user prompt for the action plan.
-// Design notes: .kiro/specs/climatecheck-mvp/design.md ("Action plan prompt").
+// Design notes: .kiro/specs/betterboston-mvp/design.md ("Action plan prompt").
 import "server-only";
 import type { LiveFacts } from "@/lib/live/context";
 import type { PlanAudience, Program, ScoreCell, ScoreMetadata } from "@/lib/types";

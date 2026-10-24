@@ -2,7 +2,7 @@
 // 200 LiveBundle: every live source for the point, each { ok: true, data, sources, fetched_at }
 //     or { ok: false, error, message }. Hide any card whose source is not ok.
 // 400 bad coordinates
-// Contract: .kiro/specs/climatecheck-mvp/design.md ("Live data")
+// Contract: .kiro/specs/betterboston-mvp/design.md ("Live data")
 import type { NextRequest } from "next/server";
 import { parseLatLng } from "@/lib/live/params";
 import { getLiveBundle } from "@/lib/live";

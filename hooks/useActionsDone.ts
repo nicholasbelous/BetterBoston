@@ -3,7 +3,7 @@
 import { useCallback, useMemo } from "react";
 import { useStoredString } from "@/hooks/useStoredString";
 
-const KEY = "climatecheck:actions-done";
+const KEY = "betterboston:actions-done";
 
 function parse(raw: string | null): string[] {
   if (!raw) return [];

@@ -2,7 +2,7 @@ import type { ReactNode } from 'react';
 import { Link, NavLink } from 'react-router-dom';
 import { Icon } from './Icon';
 
-export const APP_NAME = '[PROJECT_NAME]';
+export const APP_NAME = 'BetterBoston';
 
 export function Header({ minimal = false }: { minimal?: boolean }) {
   return (

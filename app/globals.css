@@ -3,7 +3,7 @@
 @import "maplibre-gl/dist/maplibre-gl.css";
 
 /*
-  ClimateCheck MA design tokens (dark navy + mint/teal).
+  BetterBoston design tokens (dark navy + mint/teal).
   Use as Tailwind classes: bg-navy-900, text-ink-dim, border-line, bg-mint, ...
 */
 @theme {

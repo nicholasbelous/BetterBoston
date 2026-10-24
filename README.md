@@ -1,4 +1,4 @@
-# ClimateCheck MA
+# BetterBoston
 
 **Type a Boston address. See your block from above, how hot its ground got on a summer day, how green it is, what's happening there right now, and which real Massachusetts programs can help you.**
 
@@ -127,7 +127,7 @@ We built the whole project in Kiro, with three people working in parallel on the
   - `data.md`: the Landsat formulas, QA masks, coordinate systems, score definitions, and the rules for each live data source.
   - `tech.md` and `structure.md`: the stack, conventions, and who owns which files, so parallel Kiro sessions didn't overwrite each other.
 - **Specs** ([`.kiro/specs/`](.kiro/specs/)):
-  - `climatecheck-mvp`: requirements in WHEN/SHALL form, a design with every API contract and the AI output schema, and numbered tasks that match `TODO (task X.Y)` comments in the code.
+  - `betterboston-mvp`: requirements in WHEN/SHALL form, a design with every API contract and the AI output schema, and numbered tasks that match `TODO (task X.Y)` comments in the code.
   - `landsat-data-pipeline`: the pipeline was built spec-first (requirements → design → tasks). Its property-based tests (Hypothesis) caught a 0-D scalar bug in the QA mask and NDVI functions before any real data ran.
 - **Hooks** ([`.kiro/hooks/`](.kiro/hooks/)):
   - Saving or creating a file in `data/scores/` runs the score validator, so sample data can never be marked real.

@@ -1,7 +1,7 @@
 // GET /api/score?lat=<num>&lng=<num>
 // 200 ScoreLookupResponse (status: ok | no_data | out_of_coverage)
 // 400 bad coordinates | 503 score files missing
-// Contract: .kiro/specs/climatecheck-mvp/design.md ("API routes")
+// Contract: .kiro/specs/betterboston-mvp/design.md ("API routes")
 import type { NextRequest } from "next/server";
 import { lookupScore } from "@/lib/scores";
 import type { ApiError } from "@/lib/types";

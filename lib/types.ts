@@ -1,6 +1,6 @@
-// Shared types for ClimateCheck MA.
+// Shared types for BetterBoston.
 // The score types mirror the pipeline output schema exactly
-// (see .kiro/specs/climatecheck-mvp/design.md, "GeoJSON schema").
+// (see .kiro/specs/betterboston-mvp/design.md, "GeoJSON schema").
 // If you change a field here, change pipeline/build_grid.py,
 // pipeline/make_sample_data.py, and pipeline/validate_scores.py too.
 

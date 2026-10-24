@@ -1,4 +1,4 @@
-# Product: ClimateCheck MA (working name, final name is [PROJECT_NAME])
+# Product: BetterBoston
 
 A mobile-first web app that turns satellite and aerial imagery into a plain-English climate report for a Massachusetts home or block.
 

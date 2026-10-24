@@ -15,7 +15,7 @@ const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 
 async function get(url, label) {
   for (let attempt = 1; attempt <= 4; attempt++) {
-    const res = await fetch(url, { headers: { "User-Agent": "ClimateCheckMA/0.1 (hackathon)" } });
+    const res = await fetch(url, { headers: { "User-Agent": "BetterBoston/0.1 (hackathon)" } });
     if (res.ok) return res.json();
     const body = await res.text();
     if (res.status === 429 && attempt < 4) {

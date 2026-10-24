@@ -1,4 +1,4 @@
-# Design: ClimateCheck MA MVP
+# Design: BetterBoston MVP
 
 ## Overview
 

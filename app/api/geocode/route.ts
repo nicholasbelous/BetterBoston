@@ -1,6 +1,6 @@
 // GET /api/geocode?q=<address>
 // 200 LocationResult | 400 missing/too-long q | 404 no match | 502 geocoder error
-// Contract: .kiro/specs/climatecheck-mvp/design.md ("API routes")
+// Contract: .kiro/specs/betterboston-mvp/design.md ("API routes")
 import type { NextRequest } from "next/server";
 import { geocodeAddress } from "@/lib/geocoder";
 import type { ApiError, LocationResult } from "@/lib/types";

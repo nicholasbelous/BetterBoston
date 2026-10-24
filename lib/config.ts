@@ -2,8 +2,8 @@
 // touch process.env directly. Never import this from a client component.
 import "server-only";
 
-/** Display name. Change here when the team picks the final [PROJECT_NAME]. */
-export const APP_NAME = "ClimateCheck MA";
+/** Display name. */
+export const APP_NAME = "BetterBoston";
 
 export type GeocoderProvider = "census" | "nominatim";
 
@@ -16,7 +16,7 @@ export const config = {
   anthropicApiKey: optional("ANTHROPIC_API_KEY"),
   claudeModel: optional("CLAUDE_MODEL") ?? "claude-haiku-5-5",
   geocoderProvider: (optional("GEOCODER_PROVIDER") ?? "census") as GeocoderProvider,
-  geocoderUserAgent: optional("GEOCODER_USER_AGENT") ?? "ClimateCheckMA/0.1",
+  geocoderUserAgent: optional("GEOCODER_USER_AGENT") ?? "BetterBoston/0.1",
   nominatimBaseUrl: optional("NOMINATIM_BASE_URL") ?? "https://nominatim.openstreetmap.org",
   allowUnverifiedPrograms: optional("ALLOW_UNVERIFIED_PROGRAMS") === "true",
   /** Folder with demo_grid.geojson + demo_grid.meta.json, relative to the project root */
