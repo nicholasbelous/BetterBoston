@@ -10,7 +10,24 @@
 import type { ExpressionSpecification, Map as MapLibreMap, GeoJSONSource } from "maplibre-gl";
 import { useEffect, useRef, useState } from "react";
 import { loadMaplibre } from "@/components/map/loadMaplibre";
-import type { ScoreCell, ScoreGrid } from "@/lib/types";
+import type { GridCellSummary } from "@/lib/types";
+
+/** Cells to color: GET /api/grid output (a full ScoreGrid also fits). */
+export interface MapGrid {
+  type: "FeatureCollection";
+  features: GridCellSummary[];
+}
+export type MapCell = GridCellSummary["properties"];
+
+function ringCenter(geometry: GridCellSummary["geometry"]): { lat: number; lng: number } | null {
+  const ring = geometry.coordinates[0] ?? [];
+  let w = Infinity, s = Infinity, e = -Infinity, n = -Infinity;
+  for (const [x, y] of ring) {
+    if (x === undefined || y === undefined) continue;
+    w = Math.min(w, x); e = Math.max(e, x); s = Math.min(s, y); n = Math.max(n, y);
+  }
+  return Number.isFinite(w) && Number.isFinite(s) ? { lat: (s + n) / 2, lng: (w + e) / 2 } : null;
+}
 
 export type MapMetric = "heat" | "tree";
 
@@ -20,7 +37,7 @@ interface MapViewProps {
   /** Optional GeoJSON polygon of the score cell to outline */
   cellGeometry?: { type: "Polygon"; coordinates: number[][][] };
   /** Score cells to color on the map. */
-  grid?: ScoreGrid;
+  grid?: MapGrid;
   /** Which score colors the grid. */
   metric?: MapMetric;
   /** Show the aerial photo basemap under the grid. */
@@ -28,7 +45,7 @@ interface MapViewProps {
   /** Highlighted cell. */
   selectedCellId?: string | null;
   /** Called when someone taps a grid cell. */
-  onSelectCell?: (cell: ScoreCell, center: { lat: number; lng: number }) => void;
+  onSelectCell?: (cell: MapCell, center: { lat: number; lng: number }) => void;
   className?: string;
   ariaLabel?: string;
 }
@@ -191,11 +208,9 @@ export default function MapView({
         const id = e.features?.[0]?.properties?.cell_id as string | undefined;
         const feature = latest.current.grid?.features.find((f) => f.properties.cell_id === id);
         if (!feature) return;
-        const [w, south, east, n] = feature.properties.bbox;
-        latest.current.onSelectCell?.(feature.properties, {
-          lat: (south + n) / 2,
-          lng: (w + east) / 2,
-        });
+        // /api/grid cells carry no bbox, so take the center from the polygon.
+        const center = ringCenter(feature.geometry);
+        if (center) latest.current.onSelectCell?.(feature.properties, center);
       });
       map.on("mouseenter", "grid-fill", () => (map.getCanvas().style.cursor = "pointer"));
       map.on("mouseleave", "grid-fill", () => (map.getCanvas().style.cursor = ""));

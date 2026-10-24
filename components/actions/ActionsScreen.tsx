@@ -114,7 +114,9 @@ export default function ActionsScreen({ initial }: { initial: LocationContext })
           <h1 className="font-display text-2xl font-bold leading-tight tracking-tight md:text-3xl">
             Recommended Actions
           </h1>
-          <p className="text-sm text-ink-dim">Personalized for your home and neighborhood.</p>
+          <p className="text-sm text-ink-dim">
+            {apiPlan ? `Picked for ${title} from checked Massachusetts programs.` : "Ideas to keep your home cooler."}
+          </p>
         </div>
       </div>
 

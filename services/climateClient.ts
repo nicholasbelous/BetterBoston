@@ -8,15 +8,18 @@
 // This file only reads the API contracts in lib/types.ts. It does not change them.
 import type {
   ActionPlan,
+  GridResponse,
+  LiveBundle,
   LocationResult,
   ScoreCell,
   ScoreCellFeature,
+  ScoreGrid,
   ScoreLookupResponse,
   ScoreMetadata,
   Tenure,
 } from "@/lib/types";
 import { DEMO_ADDRESSES, type DemoAddress } from "@/mocks/demoAddresses.mock";
-import { findMockCell, MOCK_METADATA } from "@/mocks/climate.mock";
+import { findMockCell, MOCK_GRID, MOCK_METADATA } from "@/mocks/climate.mock";
 import { mockExtrasFor, type HomeExtras } from "@/mocks/homeExtras.mock";
 
 export type DataOrigin = "api" | "mock";
@@ -158,6 +161,47 @@ export async function loadReport(lat: number, lng: number): Promise<ReportData> 
     }
   }
   return mockReport(lat, lng);
+}
+
+// ---------- score grid for the map ----------
+
+export interface GridData {
+  origin: DataOrigin;
+  isSample: boolean;
+  grid: GridResponse | ScoreGrid;
+}
+
+let gridCache: Promise<GridData> | null = null;
+
+/** Every score cell, for coloring the map. Same cells and ids as /api/score. Cached per page load. */
+export function loadGrid(): Promise<GridData> {
+  gridCache ??= (async (): Promise<GridData> => {
+    const res = await fetchWithTimeout("/api/grid", {}, 10000);
+    if (res?.ok) {
+      try {
+        const body = (await res.json()) as GridResponse;
+        return { origin: "api", isSample: body.metadata.is_sample, grid: body };
+      } catch {
+        /* fall through */
+      }
+    }
+    gridCache = null; // try the API again next time
+    return { origin: "mock", isSample: true, grid: MOCK_GRID };
+  })();
+  return gridCache;
+}
+
+// ---------- live data (GET /api/live) ----------
+
+/** Live context for a point. Null when the route fails; each source may still be ok: false (hide its card). */
+export async function loadLive(lat: number, lng: number): Promise<LiveBundle | null> {
+  const res = await fetchWithTimeout(`/api/live?lat=${lat}&lng=${lng}`, {}, 15000);
+  if (!res?.ok) return null;
+  try {
+    return (await res.json()) as LiveBundle;
+  } catch {
+    return null;
+  }
 }
 
 // ---------- action plan ----------

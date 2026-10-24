@@ -8,6 +8,7 @@ import { useState } from "react";
 import CoverageNotice from "@/components/CoverageNotice";
 import DataSourceNote from "@/components/DataSourceNote";
 import AerialPhoto, { inMassachusettsBox } from "@/components/report/AerialPhoto";
+import LiveConditions from "@/components/report/LiveConditions";
 import { coverTone, levelFromScore, riskTone, TONE_TEXT } from "@/components/report/levels";
 import RiskTile from "@/components/report/RiskTile";
 import SampleDataBanner from "@/components/SampleDataBanner";
@@ -43,10 +44,10 @@ function readSaved(raw: string | null): string[] {
 }
 
 function heatHeadline(level: ReturnType<typeof levelFromScore>): string {
-  if (level === "High") return "This home is in a high heat exposure area.";
-  if (level === "Moderate") return "This home is in a moderate heat exposure area.";
-  if (level === "Low") return "This home is in a lower heat exposure area.";
-  return "Heat data for this block is coming soon.";
+  if (level === "High") return "Your block's ground got hotter than most blocks we compared.";
+  if (level === "Moderate") return "Your block's ground was in the middle of the blocks we compared.";
+  if (level === "Low") return "Your block's ground stayed cooler than most blocks we compared.";
+  return "Not enough clear heat data for this block.";
 }
 
 function heatDetail(cell: ScoreCell, metadata: ScoreMetadata): string {
@@ -83,11 +84,10 @@ function RiskSummary({ data }: { data: ReportData }) {
   const heat = levelFromScore(data.cell?.heat_score);
   const tree = levelFromScore(data.cell?.tree_score);
   return (
+    // Flood and air quality are live values in "Right now near you" below, not made-up levels.
     <div className="grid grid-cols-2 gap-3">
-      <RiskTile icon="thermometer" label="Heat Exposure" level={heat} tone={riskTone(heat)} />
-      <RiskTile icon="tree" label="Tree Coverage" level={tree} tone={coverTone(tree)} />
-      <RiskTile icon="waves" label="Flood Risk" level={data.extras.flood} tone={riskTone(data.extras.flood)} sample />
-      <RiskTile icon="wind" label="Air Quality" level={data.extras.air} tone={riskTone(data.extras.air)} sample />
+      <RiskTile icon="thermometer" label="Ground heat" level={heat} tone={riskTone(heat)} emptyText="No data" />
+      <RiskTile icon="tree" label="Green cover" level={tree} tone={coverTone(tree)} emptyText="No data" />
     </div>
   );
 }
@@ -144,10 +144,18 @@ export default function ReportScreen({ initial }: { initial: LocationContext }) 
           <Icon name="arrowLeft" size={20} />
         </Link>
         <div className="min-w-0 flex-1 pt-0.5">
-          <h1 className="truncate font-display text-2xl font-bold leading-tight tracking-tight md:text-3xl">{title}</h1>
-          {sub ? <p className="truncate text-sm text-ink-dim">{sub}</p> : null}
+          {/* Wrap instead of truncating: on a phone the buttons left only ~5 letters of the address. */}
+          <h1 className="line-clamp-2 break-words font-display text-xl font-bold leading-tight tracking-tight sm:text-2xl md:text-3xl">
+            {title}
+          </h1>
+          {sub ? <p className="line-clamp-2 text-sm text-ink-dim">{sub}</p> : null}
         </div>
-        {covered ? <span className={`${eyebrowPill} mt-1 hidden sm:inline-flex`}>Analyzed</span> : null}
+        {/* Wrapper: eyebrowPill's inline-flex overrode "hidden", so the pill squeezed the address on phones. */}
+        {covered ? (
+          <span className="mt-1 hidden sm:block">
+            <span className={eyebrowPill}>Analyzed</span>
+          </span>
+        ) : null}
         <button type="button" onClick={share} aria-label="Share this report" className={iconBtn}>
           <Icon name="share" size={19} />
         </button>
@@ -165,7 +173,7 @@ export default function ReportScreen({ initial }: { initial: LocationContext }) 
       <div className="mb-4">
         <SampleDataBanner
           show={data?.isSample ?? true}
-          note="Flood risk and air quality are placeholders. The aerial photo is real."
+          note="The aerial photo and the local conditions are real."
         />
       </div>
 
@@ -194,8 +202,9 @@ export default function ReportScreen({ initial }: { initial: LocationContext }) 
         {data === null ? (
           <Skeleton />
         ) : data.status === "out_of_coverage" ? (
-          <div className="max-w-xl">
+          <div className="flex max-w-xl flex-col gap-5">
             <CoverageNotice neighborhoods={data.metadata.area.neighborhoods} />
+            {showPhoto ? <LiveConditions lat={initial.lat} lng={initial.lng} /> : null}
           </div>
         ) : (
           <div className="flex flex-col gap-5">
@@ -234,6 +243,7 @@ export default function ReportScreen({ initial }: { initial: LocationContext }) 
                     </div>
                   </section>
                 ) : null}
+                <LiveConditions lat={initial.lat} lng={initial.lng} />
               </div>
             ) : null}
 
@@ -247,9 +257,8 @@ export default function ReportScreen({ initial }: { initial: LocationContext }) 
                 <ScoreCard kind="heat" cell={data.cell} metadata={data.metadata} />
                 <ScoreCard kind="tree" cell={data.cell} metadata={data.metadata} />
                 <p className={`${card} p-4 text-sm leading-relaxed text-ink-dim`}>
-                  <strong className="font-medium text-ink">Flood risk and air quality</strong> are shown as
-                  placeholders for now. We don&apos;t have a flood or air-quality dataset yet, so those two tiles are
-                  marked &ldquo;Sample&rdquo;.
+                  <strong className="font-medium text-ink">Flooding, air quality, and today&apos;s weather</strong> are
+                  live readings from public agencies. See &ldquo;Right now near you&rdquo; on the Overview tab.
                 </p>
               </div>
             ) : null}

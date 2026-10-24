@@ -16,8 +16,8 @@ type LayerId = MapMetric | "flood";
 
 const LAYERS: ChipOption<LayerId>[] = [
   { id: "heat", label: "Heat", icon: "thermometer" },
-  { id: "tree", label: "Trees", icon: "tree" },
-  { id: "flood", label: "Flood", icon: "water", disabled: true, hint: "no flood data yet" },
+  { id: "tree", label: "Green", icon: "tree" },
+  { id: "flood", label: "Flood", icon: "water", disabled: true, hint: "flood details are in the report" },
 ];
 
 const NO_PLANTS: ReadonlySet<ImprovementId> = new Set();
@@ -61,7 +61,7 @@ export default function MapSheet({ title, sub, report, metric, onMetric, reportH
           {covered ? (
             <div className="mt-1.5 flex flex-wrap gap-1.5">
               {heat ? <Badge label="Heat" value={heat} tone={riskTone(heat)} /> : null}
-              {tree ? <Badge label="Trees" value={tree} tone={coverTone(tree)} /> : null}
+              {tree ? <Badge label="Green cover" value={tree} tone={coverTone(tree)} /> : null}
             </div>
           ) : null}
         </div>
@@ -71,16 +71,22 @@ export default function MapSheet({ title, sub, report, metric, onMetric, reportH
         <p className="text-sm text-ink-dim" role="status">
           Checking this block...
         </p>
-      ) : covered ? (
-        <Link href={reportHref} className={`${btnPrimary} w-full`}>
-          View Climate Report
-          <Icon name="arrowRight" size={18} />
-        </Link>
       ) : (
-        <p className="flex items-start gap-2 rounded-xl bg-amber/10 p-3 text-sm text-amber" role="status">
-          <Icon name="info" size={18} className="mt-px shrink-0" />
-          We haven&apos;t mapped this spot yet. Try a spot inside the colored area.
-        </p>
+        <>
+          {!covered ? (
+            <p className="flex items-start gap-2 rounded-xl bg-amber/10 p-3 text-sm text-amber" role="status">
+              <Icon name="info" size={18} className="mt-px shrink-0" />
+              {report.status === "no_data"
+                ? "Not enough clear data for this block."
+                : "No scores here yet. The report still shows the aerial photo and local conditions."}
+            </p>
+          ) : null}
+          {/* The report works everywhere in Massachusetts (photo + live data), so always offer it. */}
+          <Link href={reportHref} className={`${btnPrimary} w-full`}>
+            View Climate Report
+            <Icon name="arrowRight" size={18} />
+          </Link>
+        </>
       )}
 
       <FilterChips<LayerId>

@@ -3,8 +3,8 @@ import type { MapMetric } from "@/components/MapView";
 const COPY: Record<MapMetric, { bar: string; low: string; high: string; note: string }> = {
   heat: {
     bar: "heat-gradient",
-    low: "Lower risk",
-    high: "Higher risk",
+    low: "Cooler ground",
+    high: "Hotter ground",
     note: "Ground surface heat compared with other blocks",
   },
   tree: {

@@ -17,16 +17,10 @@ export interface DemoAddress {
   aliases: string[];
 }
 
+// The first three points sit inside scored cells (checked with GET /api/score).
+// Beacon Hill is last on purpose: it is outside the scored area, so it demos
+// "Coverage coming soon" with the real aerial photo above it.
 export const DEMO_ADDRESSES: DemoAddress[] = [
-  {
-    id: "beacon-hill",
-    label: "72 Beacon St",
-    cityLine: "Boston, MA 02108",
-    neighborhood: "Beacon Hill",
-    lat: 42.3563,
-    lng: -71.0689,
-    aliases: ["72 beacon", "beacon st", "beacon street", "beacon hill"],
-  },
   {
     id: "chinatown",
     label: "Hudson St",
@@ -54,7 +48,16 @@ export const DEMO_ADDRESSES: DemoAddress[] = [
     lng: -71.039,
     aliases: ["meridian", "east boston", "eastie"],
   },
+  {
+    id: "beacon-hill",
+    label: "72 Beacon St",
+    cityLine: "Boston, MA 02108",
+    neighborhood: "Beacon Hill",
+    lat: 42.3563,
+    lng: -71.0689,
+    aliases: ["72 beacon", "beacon st", "beacon street", "beacon hill"],
+  },
 ];
 
-/** The address every screen shows when no location has been chosen yet. */
+/** The address every screen shows when no location has been chosen yet (Chinatown, inside the scored area). */
 export const DEFAULT_DEMO_ADDRESS = DEMO_ADDRESSES[0] as DemoAddress;

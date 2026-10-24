@@ -1,17 +1,16 @@
 "use client";
 // Screen 2: interactive climate map.
 // Search bar, layer button, locate button, colored score grid, and a sheet for the selected place.
-import { useId, useState } from "react";
+import { useEffect, useId, useState } from "react";
 import MapView, { type MapMetric } from "@/components/MapView";
 import MapSheet from "@/components/map/MapSheet";
 import SampleDataBanner from "@/components/SampleDataBanner";
 import Icon from "@/components/ui/Icon";
 import { iconBtn } from "@/components/ui/classes";
 import { useReport } from "@/hooks/useReport";
-import { AddressError, geocodeAddress } from "@/services/climateClient";
+import { AddressError, geocodeAddress, loadGrid, type GridData } from "@/services/climateClient";
 import { getDevicePosition, LocationError } from "@/services/geolocate";
 import { splitAddress, withLocation, type LocationContext } from "@/services/locationContext";
-import { MOCK_GRID } from "@/mocks/climate.mock";
 
 interface Place {
   lat: number;
@@ -31,6 +30,19 @@ export default function MapScreen({ initial }: { initial: LocationContext }) {
 
   const { data: report } = useReport(place.lat, place.lng);
   const { title, sub } = splitAddress(place.label);
+
+  // Color the map with the same cells /api/score uses, so the colors match the score cards.
+  const [gridData, setGridData] = useState<GridData | null>(null);
+  useEffect(() => {
+    let cancelled = false;
+    loadGrid().then((g) => {
+      if (!cancelled) setGridData(g);
+    });
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+  const gridIsSample = gridData?.isSample ?? true;
 
   function choose(next: Place) {
     setPlace(next);
@@ -76,8 +88,8 @@ export default function MapScreen({ initial }: { initial: LocationContext }) {
     <div className="-mb-24 flex h-[calc(100dvh-7.5rem)] min-h-[34rem] flex-col md:-mb-12 md:h-[calc(100dvh-4rem)]">
       <div className="shrink-0 px-3 py-2">
         <SampleDataBanner
-          show={report?.isSample ?? true}
-          note="The colored map is a sample grid."
+          show={(report?.isSample ?? true) || gridIsSample}
+          note="The colored squares are sample scores. The aerial photo is real."
         />
       </div>
 
@@ -85,7 +97,7 @@ export default function MapScreen({ initial }: { initial: LocationContext }) {
         <MapView
           lat={place.lat}
           lng={place.lng}
-          grid={MOCK_GRID}
+          grid={gridData?.grid}
           metric={metric}
           aerial={aerial}
           selectedCellId={report?.cell?.cell_id ?? null}

@@ -47,8 +47,10 @@ export default function ActionPlanList({ plan, loading, error }: ActionPlanListP
     <section className="flex flex-col gap-3">
       <div className={`${card} p-4`}>
         <p className="flex items-center gap-1.5 text-xs font-medium text-mint">
-          <Icon name="sparkle" size={14} />
-          Written by AI from our checked program list
+          <Icon name={plan.source === "ai" ? "sparkle" : "shield"} size={14} />
+          {plan.source === "ai"
+            ? "Written by AI from our checked program list"
+            : "Built from our checked program list"}
         </p>
         <p className="mt-2 text-sm leading-relaxed">{plan.summary}</p>
         {plan.based_on_sample_data ? (

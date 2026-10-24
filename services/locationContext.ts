@@ -6,7 +6,7 @@ import { DEFAULT_DEMO_ADDRESS } from "@/mocks/demoAddresses.mock";
 export interface LocationContext {
   lat: number;
   lng: number;
-  /** Full label, e.g. "72 Beacon St, Boston, MA 02108". */
+  /** Full label, e.g. "50 Hudson St, Boston, MA 02111". */
   q: string;
   /** true when no location was chosen and the demo address is being shown. */
   isDefault: boolean;

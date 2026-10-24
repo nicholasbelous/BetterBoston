@@ -12,9 +12,10 @@ import Icon, { type IconName } from "@/components/ui/Icon";
 import { eyebrowPill } from "@/components/ui/classes";
 
 const VALUES: { icon: IconName; label: string }[] = [
-  { icon: "target", label: "Real data" },
-  { icon: "sparkle", label: "AI insights" },
-  { icon: "heart", label: "Actionable tips" },
+  // Only claims that are true today (scores are still SAMPLE data).
+  { icon: "map", label: "Aerial photos" },
+  { icon: "database", label: "Live local data" },
+  { icon: "shield", label: "Checked programs" },
 ];
 
 // Stagger for the entrance animation (the .rise-in class is disabled for reduced motion).
