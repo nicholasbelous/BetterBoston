@@ -36,6 +36,7 @@ export default function HomePage() {
             fill
             priority
             sizes="100vw"
+            quality={90}
             className="hero-drift object-cover object-[50%_58%] lg:object-[50%_52%]"
           />
         </div>
