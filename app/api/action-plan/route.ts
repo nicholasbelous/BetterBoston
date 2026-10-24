@@ -11,7 +11,8 @@ export async function POST(request: Request) {
   // 1. Parse body with zod: cell_id string, tenure "renter" | "owner".
   // 2. getCellById(cell_id) -> 404 if missing.
   // 3. filterByTenure(await loadPrograms(), tenure).
-  // 4. buildSystemPrompt() + buildUserPrompt(...) -> converseForJson(...).
+  // 4. buildSystemPrompt() + buildUserPrompt(...) -> generateJson(...) from lib/claude.ts,
+  //    with toolName "submit_action_plan" and inputSchema modelActionPlanJsonSchema.
   // 5. validateModelPlan(raw, programIds). On failure return 502 and let the UI
   //    show the plain program list as a fallback.
   // 6. Fill each action's link from the program record. Return ActionPlan.

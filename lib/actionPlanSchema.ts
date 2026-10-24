@@ -19,7 +19,7 @@ export const modelActionPlanSchema = z.object({
 
 export type ModelActionPlan = z.infer<typeof modelActionPlanSchema>;
 
-/** JSON Schema passed to Bedrock as the tool inputSchema. */
+/** JSON Schema passed to Claude as the submit_action_plan tool's input_schema (lib/claude.ts). */
 export const modelActionPlanJsonSchema = z.toJSONSchema(modelActionPlanSchema);
 
 /**

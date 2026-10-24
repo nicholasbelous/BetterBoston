@@ -21,7 +21,7 @@ Type a Massachusetts address and get a plain-English climate report for your blo
 git clone https://github.com/nicholasbelous/Hackachusetts.git
 cd Hackachusetts
 npm install
-cp .env.example .env.local      # fill in AWS keys later (Person 3)
+cp .env.example .env.local      # Person 3 adds ANTHROPIC_API_KEY; others can leave it blank
 npm run dev                     # http://localhost:3000
 ```
 
@@ -91,7 +91,7 @@ Reuse from the prototype: `Initial-Kiro-Design/backend/app/pipeline/trees.py` an
 
 Owns `app/api/`, `lib/` (except the score types, which Person 2 owns), `data/programs/`, `.env.example`, and `.kiro/`.
 
-- [ ] **Setup.** `npm install server-only`. Confirm that `npm run build` and `npm run lint` pass on `main`. Request AWS credentials and Bedrock model access now, since access requests can take time.
+- [ ] **Setup.** Confirm that `npm run build` and `npm run lint` pass on `main`. Create an Anthropic API key at [console.anthropic.com](https://console.anthropic.com) and put it in `.env.local` as `ANTHROPIC_API_KEY`. Never commit it or put it in client code.
 - [ ] **Hour 1: Landsat scene for Person 2.** Find a Landsat 8/9 Collection 2 Level-2 scene: summer 2024 or 2025, cloud-free over Boston, on a hot, clear day. Sources:
   - [USGS EarthExplorer](https://earthexplorer.usgs.gov/) (free account)
   - Microsoft Planetary Computer STAC, collection `landsat-c2-l2` (no account needed)
@@ -101,7 +101,7 @@ Owns `app/api/`, `lib/` (except the score types, which Person 2 owns), `data/pro
 - [ ] **Kiro steering + hook.** Write `.kiro/steering/` `product.md`, `tech.md`, `structure.md`, and `data.md` early, so Kiro follows the honesty rules for everyone. Add a hook that runs `npm run validate:data` when `data/scores/` changes.
 - [ ] **4.1 Program data.** Create `data/programs/cooling_centers.json`, `tree_requests.json`, `mass_save_rebates.json`, and `community_solar.json` (shape: `ProgramFile` in `lib/types.ts`). **Every fact must come from the program's official page.** Set `last_verified` only after a person has checked the facts. Unverified programs are hidden. Leave out any phone number, dollar amount, or eligibility rule you can't confirm. Start from `Initial-Kiro-Design/backend/app/data/programs.json`.
 - [ ] **4.2 Prompt.** `lib/actionPlanPrompt.ts`: use only the provided programs, cite them by `id`, invent no numbers or rules, explain that scores are relative and that heat is surface temperature, and write in plain English.
-- [ ] **4.3 Bedrock.** `lib/bedrock.ts`: call the Converse API with one forced tool (`submit_action_plan`) so the reply is JSON. `lib/actionPlanSchema.ts`: validate with zod and drop actions with unknown program ids. Copy links from the program record, never from model output. Then implement `app/api/action-plan/route.ts`.
+- [ ] **4.3 Claude call.** `lib/claude.ts` is already written: `generateJson` forces Claude to answer through one tool (`submit_action_plan`), so the reply is JSON. Model is `CLAUDE_MODEL` (default `claude-haiku-5-5`). `lib/actionPlanSchema.ts`: validate with zod and drop actions with unknown program ids. Copy links from the program record, never from model output. Then implement `app/api/action-plan/route.ts`.
 - [ ] **5.1 Renter/owner.** `filterByTenure` so renters get cooling centers, tree requests, and community solar, while owners also get heat pumps, cool roofs, and rooftop solar.
 - [ ] **Kiro spec.** Write `.kiro/specs/climatecheck-mvp/` `requirements.md`, `design.md`, and `tasks.md`. Task numbers in the TODO comments (1.1, 1.4, 4.3...) should match `tasks.md`.
 - [ ] **Stretch: solar score** (Google Solar API, `GOOGLE_SOLAR_API_KEY`). Only after everything above works.
@@ -113,7 +113,7 @@ Reuse from the prototype: `Initial-Kiro-Design/backend/app/services/plan.py` has
 | Hour | Milestone | Who |
 |---|---|---|
 | 0:15 | Decisions made, everyone running `npm run dev` | All |
-| 1:00 | Sample grid committed. Landsat scene downloaded. Bedrock access requested | P2, P3 |
+| 1:00 | Sample grid committed. Landsat scene downloaded. Claude API key working | P2, P3 |
 | 2:00 | Address search → report page with map and sample score cards works end to end | P1, P3 |
 | 3:00 | Real tree scores committed (heat still `null`) | P2 |
 | 4:30 | Real heat scores in the grid. Action plan endpoint working | P2, P3 |
