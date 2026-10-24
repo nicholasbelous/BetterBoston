@@ -6,18 +6,18 @@ Build the pipeline as small Python 3 scripts in `pipeline/`, in the order set by
 
 ## Tasks
 
-- [ ] 1. Set up dependencies, config, smoke test, and test harness
-  - [ ] 1.1 Create `pipeline/requirements.txt` and `pipeline/config.py`
+- [x] 1. Set up dependencies, config, smoke test, and test harness
+  - [x] 1.1 Create `pipeline/requirements.txt` and `pipeline/config.py`
     - `requirements.txt`: the 10 packages from the design, one per line, `>=` or unversioned, no `==`
     - `config.py` (stdlib only): `REPO_ROOT`, `CELL_SIZE_M`, `NDVI_THRESHOLD`, `PROCESSING_CRS`, `OUTPUT_CRS`, `MIN_VALID_FRAC`, `CLEAR_FRACTION_MIN`, `HTTP_TIMEOUT_S`, `DEFAULT_SCENE_*`, ordered `DEMO_BBOXES`, `STAC_API_URL`, `COLLECTION_ID`, `CENSUS_ZIP_URLS`, `ASSET_KEYS`, `LOCAL_BAND_NAMES`, all repo-relative paths, `BBOX_PAD_DEG`
     - Implement `bbox_from_geojson`, `load_boston_bbox` (returns `None` on missing or unparseable file, never raises), `BOSTON_BBOX`, `abs_path`, `ensure_work_dir`, `require_boston_bbox`
     - _Requirements: 1.1, 1.2, 1.3, 1.4, 1.5, 1.6, 1.7, 1.8, 1.9, 1.10_
 
-  - [ ] 1.2 Create `pipeline/tests/conftest.py`
+  - [x] 1.2 Create `pipeline/tests/conftest.py`
     - Insert `pipeline/` into `sys.path`; register and load the hypothesis profile `max_examples=100, deadline=None`
     - _Requirements: 4.14_
 
-  - [ ] 1.3 Create `pipeline/raster_io.py` (initial helpers) and `pipeline/smoke_test.py`
+  - [x] 1.3 Create `pipeline/raster_io.py` (initial helpers) and `pipeline/smoke_test.py`
     - In `raster_io.py`, add only `open_stac(timeout=HTTP_TIMEOUT_S)` and `write_json_atomic(path, text)` for now; task 4.1 adds the raster functions
     - `smoke_test.py`: `SMOKE_POINT`, `asset_report`, `format_item`, `main`; search at most 3 items at `(-71.06, 42.36)`, print "n/a" for missing `platform` / `eo:cloud_cover`, report present/missing Asset_Keys
     - Exit 1 on STAC error or timeout (print underlying error) and on zero items; exit 0 otherwise, even with missing keys; read metadata only, write no files
@@ -39,8 +39,8 @@ Build the pipeline as small Python 3 scripts in `pipeline/`, in the order set by
     - Mock `open_stac`: STAC error exits 1 with the error printed; zero items exits 1; items with missing keys exit 0
     - _Requirements: 2.4, 2.5, 2.6_
 
-- [ ] 2. Implement the Boston boundary script
-  - [ ] 2.1 Create `pipeline/boston_boundary.py`
+- [x] 2. Implement the Boston boundary script
+  - [x] 2.1 Create `pipeline/boston_boundary.py`
     - `DownloadError`, `download` (urllib, 60 s timeout, temp file), `download_with_fallback` (GENZ2022 only on HTTP 404 from GENZ2023), `select_boston` (`NAME == "Boston"`, case-sensitive, all matches), `main`
     - Read with `geopandas.read_file("zip://...")`, reproject to EPSG:4326, save with `write_json_atomic`, print source URL and feature count
     - On download failure, unreadable zip, or no Boston feature: print which condition and URL/reason, exit 1, leave any existing `boston.geojson` unchanged
@@ -50,13 +50,13 @@ Build the pipeline as small Python 3 scripts in `pipeline/`, in the order set by
     - Mocked downloads: 404 falls back to GENZ2022; other error exits 1 and keeps the existing file; no Boston feature exits 1; local zip fixture is saved in EPSG:4326
     - _Requirements: 3.2, 3.4, 3.5, 3.6_
 
-- [ ] 3. Implement the scoring module and its tests
-  - [ ] 3.1 Create `pipeline/scoring.py`
+- [~] 3. Implement the scoring module and its tests
+  - [x] 3.1 Create `pipeline/scoring.py`
     - `QA_BAD_BITS = 0b10011011`; `dn_to_fahrenheit`, `dn_to_reflectance`, `ndvi`, `qa_mask`, `clear_fraction`, `median_valid_f`, `percentile_rank`, `apply_min_valid` as specified in the design
     - Pure numpy, no I/O, inputs never modified; Python `round` (half to even) in `percentile_rank`; 50 for a single value; all-NaN for empty or all-NaN input
     - _Requirements: 4.1, 4.2, 4.3, 4.4, 4.5, 4.6, 4.7, 4.8, 4.9, 4.13, 4.15, 4.16, 5.5, 5.6, 6.5_
 
-  - [ ] 3.2 Write property test for DN conversions in `pipeline/tests/test_scoring.py`
+  - [-] 3.2 Write property test for DN conversions in `pipeline/tests/test_scoring.py`
     - **Property 3: DN conversions match the Collection 2 formulas**
     - **Validates: Requirements 4.2, 4.3**
 
