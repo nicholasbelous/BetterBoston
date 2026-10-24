@@ -77,6 +77,7 @@ MassGIS 2025 aerial tiles ──────────────────
 | Community centers, pools, libraries | [Analyze Boston](https://data.boston.gov/) (BCYF centers and pools, Boston Public Library branches) | Live |
 | Boston hot-day trend | Open-Meteo historical weather + CMIP6 climate models | Prebuilt, `data/live/climate_boston.json` |
 | Programs in the action plan | boston.gov, masssave.com, masscec.com official pages | Curated `data/programs/`, checked October 24, 2026 |
+| Home page skyline photo | Related Beal Sales, LLC (listing agent Michael Tammaro), marketing photo of the view from [180 Beacon Street, Unit 15A](https://www.commonwealthstandard.com/investor/property/180-beacon-street-unit-15a-boston-73587883). Used with permission | Static image, `public/images/boston-skyline.jpg` |
 
 ## Limitations (we say these in the app too)
 
@@ -216,4 +217,4 @@ docs/           Team plan from hackathon day
 |---|---|
 | Nicholas Belous ([@nicholasbelous](https://github.com/nicholasbelous)) | Backend, live data, AI action plan, Kiro setup |
 | Oliver Hernandez ([@Oliverdhz](https://github.com/Oliverdhz)) | Landsat data pipeline (heat and green cover) |
-| Mohammed Komou | Frontend and landing page design | 
+| Mohammed Komou (https://github.com/komoumohammed-ai) | Frontend and landing page design | 

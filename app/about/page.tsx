@@ -79,7 +79,22 @@ export default function AboutPage() {
         </p>
       </section>
 
-
+      <section className={`${card} p-5`}>
+        <h2 className="font-display text-lg font-semibold">Image credits</h2>
+        <p className="mt-2 text-sm leading-relaxed text-ink-dim">
+          Boston skyline photo on the home page: marketing photo of the view from 180 Beacon Street,
+          Unit 15A, by Related Beal Sales, LLC (listing agent Michael Tammaro). Used with permission.{" "}
+          <a
+            href="https://www.commonwealthstandard.com/investor/property/180-beacon-street-unit-15a-boston-73587883"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-mint underline underline-offset-2"
+          >
+            View the listing
+          </a>
+          .
+        </p>
+      </section>
 
       <Link href="/" className="text-sm font-medium text-mint hover:underline">
         Back to search
