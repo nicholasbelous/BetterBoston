@@ -1,17 +1,21 @@
 // Shown when an address is outside the processed demo area.
 // Never show a score in this case.
 import Link from "next/link";
+import Icon from "@/components/ui/Icon";
+import { btnGhost, card } from "@/components/ui/classes";
 
 export default function CoverageNotice({ neighborhoods = [] }: { neighborhoods?: string[] }) {
-  // TODO (task 1.5): list metadata.area.neighborhoods so people know what IS covered.
   return (
-    <section className="rounded-lg border p-4 bg-yellow-50">
-      <h2 className="font-semibold">Coverage coming soon</h2>
-      <p>
+    <section className={`${card} flex flex-col gap-3 p-5`}>
+      <span className="grid size-10 place-items-center rounded-xl bg-amber/15 text-amber">
+        <Icon name="map" size={22} />
+      </span>
+      <h2 className="font-display text-lg font-semibold">Coverage coming soon</h2>
+      <p className="text-sm leading-relaxed text-ink-dim">
         We haven&apos;t mapped this area yet. Right now we cover a few Boston neighborhoods
         {neighborhoods.length > 0 ? `: ${neighborhoods.join(", ")}` : ""}.
       </p>
-      <Link href="/" className="underline">
+      <Link href="/" className={`${btnGhost} self-start`}>
         Try another address
       </Link>
     </section>
