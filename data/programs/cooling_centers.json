@@ -1,0 +1,34 @@
+{
+  "category": "cooling_center",
+  "programs": [
+    {
+      "id": "boston-cooling-centers",
+      "category": "cooling_center",
+      "name": "Boston cooling centers (BCYF community centers)",
+      "description": "During periods of extreme heat, Boston Centers for Youth & Families (BCYF) community centers become cooling centers. Anyone can go inside and cool off in air conditioning during the centers' regular hours. The City's heat page also lists other cool places, like pools, parks, and Boston Public Libraries.",
+      "link": "https://www.boston.gov/departments/emergency-management/keeping-cool-heat",
+      "audience": ["renter", "owner"],
+      "topics": ["heat"],
+      "last_verified": null,
+      "details": {
+        "where": "BCYF community centers",
+        "when": "During periods of extreme heat, during regular operating hours",
+        "who": "Anyone"
+      }
+    },
+    {
+      "id": "boston-alertboston",
+      "category": "cooling_center",
+      "name": "AlertBoston emergency alerts",
+      "description": "AlertBoston is the City of Boston's opt-in emergency alert system. Sign up to be told when the City declares a heat emergency, what resources are open, and how to stay safe. You can get alerts by phone, text, or email, in 11 languages.",
+      "link": "https://www.boston.gov/departments/emergency-management/city-boston-alerts-and-notifications",
+      "audience": ["renter", "owner"],
+      "topics": ["heat"],
+      "last_verified": null,
+      "details": {
+        "how": "Sign up on the City of Boston AlertBoston page",
+        "languages": "11 of Boston's most-spoken languages"
+      }
+    }
+  ]
+}

@@ -1,0 +1,21 @@
+{
+  "category": "tree_request",
+  "programs": [
+    {
+      "id": "boston-street-tree-request",
+      "category": "tree_request",
+      "name": "Request a street tree (City of Boston)",
+      "description": "You can ask the City to plant a tree on the sidewalk in front of your home or business. A City arborist checks the spot first, because it has to meet spacing rules, like being 10 feet from light poles, driveways, and hydrants. The City plants in spring and fall, and it may take up to a year. The City's Urban Forestry Division takes care of street trees.",
+      "link": "https://www.boston.gov/departments/parks-and-recreation/how-request-have-tree-planted-city-street",
+      "audience": ["renter", "owner"],
+      "topics": ["trees", "heat"],
+      "last_verified": null,
+      "details": {
+        "phone": "617-635-TREE (617-635-8733), or dial 3-1-1",
+        "email": "trees@boston.gov",
+        "sidewalk_rule": "Sidewalk must be at least six feet wide, not counting the curb",
+        "new_tree_pit": "If there is no tree pit yet, the abutting property owner or resident must make the request"
+      }
+    }
+  ]
+}

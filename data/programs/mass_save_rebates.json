@@ -1,0 +1,46 @@
+{
+  "category": "rebate",
+  "programs": [
+    {
+      "id": "mass-save-home-energy-assessment",
+      "category": "rebate",
+      "name": "Mass Save no-cost Home Energy Assessment",
+      "description": "An Energy Specialist looks at how your home uses energy and recommends upgrades, like insulation and air sealing, that keep it cooler in summer and warmer in winter. The assessment is no-cost. Renters can take part too. The City of Boston suggests asking your landlord to schedule an assessment for the building.",
+      "link": "https://www.boston.gov/departments/environment/community-first-partnership",
+      "audience": ["renter", "owner"],
+      "topics": ["energy", "heat"],
+      "last_verified": null,
+      "details": {
+        "phone": "866-527-SAVE",
+        "format": "In-person or virtual"
+      }
+    },
+    {
+      "id": "mass-save-income-eligible",
+      "category": "rebate",
+      "name": "Mass Save Income Eligible Program",
+      "description": "If your household income is under the program's limits and you live in a 1- to 4-unit home, you may get no-cost upgrades. These can include heat pumps, insulation, air sealing, and efficient window air conditioners. Both homeowners and renters can qualify. It starts with a no-cost Home Energy Assessment.",
+      "link": "https://www.masssave.com/residential/rebates-offers-services/income-based-offers/income-eligible-programs",
+      "audience": ["renter", "owner"],
+      "topics": ["energy", "heat"],
+      "last_verified": null,
+      "details": {
+        "phone": "866-537-7267",
+        "eligibility": "Income limits depend on household size. See the table on the Mass Save page."
+      }
+    },
+    {
+      "id": "mass-save-heat-pumps",
+      "category": "rebate",
+      "name": "Mass Save heat pump rebates",
+      "description": "A heat pump heats your home in winter and cools it in summer. The Sponsors of Mass Save offer rebates on heat pumps and a chance to apply for 0% financing. Mass Save suggests sealing and insulating your home first, and working with a qualified contractor.",
+      "link": "https://www.masssave.com/residential/rebates-offers-services/heating-and-cooling/heat-pumps",
+      "audience": ["owner"],
+      "topics": ["heat", "energy"],
+      "last_verified": null,
+      "details": {
+        "free_advice": "No-cost virtual consultation with a Mass Save Decarbonization Specialist"
+      }
+    }
+  ]
+}
